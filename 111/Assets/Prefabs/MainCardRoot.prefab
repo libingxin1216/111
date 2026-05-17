@@ -33,7 +33,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -130.6}
+  m_AnchoredPosition: {x: 45.2, y: -134}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2270498181528256572
@@ -53,8 +53,8 @@ MonoBehaviour:
     m_Right: 0
     m_Top: 0
     m_Bottom: 0
-  m_ChildAlignment: 0
-  m_Spacing: 0
+  m_ChildAlignment: 4
+  m_Spacing: 4
   m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 1
   m_ChildControlWidth: 0
@@ -240,7 +240,7 @@ MonoBehaviour:
   nameText: {fileID: 7985476654561361975}
   roleText: {fileID: 2979914441190604938}
   badgeGroup: {fileID: 5646600800718172102}
-  badgePrefab: {fileID: 0}
+  badgePrefab: {fileID: 3925650824909902112, guid: 7fa6a113edc7a9e4b97d465e313797be, type: 3}
   cardBorder: {fileID: 0}
   lockIcon: {fileID: 3265393172972526521}
   data: {fileID: 0}

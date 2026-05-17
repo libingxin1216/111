@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8be558ccfe06a3946be63fc0ec87b69c, type: 3}
-  m_Name: CharacterData
+  m_Name: CharacterData1
   m_EditorClassIdentifier: 
   characterId: "\u9648\u5609\u4E50"
   characterType: 0
@@ -19,11 +19,24 @@ MonoBehaviour:
   photo: {fileID: 0}
   nameOptions:
   - "\u9648\u5609\u4E50"
-  - 
-  - 
+  - "\u9648\u5EFA\u519B"
+  - "\u5218\u6842\u82F1"
+  - "\u9648\u5B88\u5C71"
+  - "\u738B\u79C0\u83B2"
+  - "\u674E\u96E8\u6B23"
+  - "\u5F20\u7FE0\u5170"
+  - "\u674E\u5EFA\u56FD"
+  - "\u8C22\u96E8\u5F64"
+  - "\u8C22\u660E\u8FDC"
+  - "\u6797\u5A49\u6E05"
+  - "\u949F\u5FB7\u53D1"
+  - "\u9AD8\u4E9A\u73CD"
+  - "\u8001\u516D"
+  - "\u6885\u4EC1\u4E49"
   roleOptions:
-  - 
-  - 
+  - "\u5C0F\u5B66\u751F"
+  - "\u5DE5\u4EBA"
+  - "\u519C\u6C11"
   badgeLabels:
   - "\u53D7\u5BB3\u4EBA"
   currentName: 
