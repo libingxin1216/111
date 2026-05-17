@@ -9,8 +9,8 @@ public class CharacterData : ScriptableObject
 
     [Header("正确答案")]
     public string correctName;
-    public string correctRole; // 仅主要人物需要
-    public Sprite photo;       // 仅主要人物需要
+    public string correctRole;
+    public Sprite photo;
 
     [Header("选择面板选项")]
     public string[] nameOptions;
@@ -19,7 +19,9 @@ public class CharacterData : ScriptableObject
     [Header("额外标签（如人贩子、在逃）")]
     public string[] badgeLabels;
 
-    [Header("运行时状态（不需要填写）")]
+    [Header("预填信息（游戏开始时直接显示，留空则不预填）")]
+    public string prefilledName;
+
     [HideInInspector] public string currentName = "";
     [HideInInspector] public string currentRole = "";
     [HideInInspector] public bool photoUnlocked = false;
@@ -27,7 +29,7 @@ public class CharacterData : ScriptableObject
 
     public void ResetRuntimeData()
     {
-        currentName = "";
+        currentName = string.IsNullOrEmpty(prefilledName) ? "" : prefilledName;
         currentRole = "";
         photoUnlocked = false;
         isLocked = false;

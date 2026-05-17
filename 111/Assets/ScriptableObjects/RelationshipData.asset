@@ -13,6 +13,45 @@ MonoBehaviour:
   m_Name: RelationshipData
   m_EditorClassIdentifier: Assembly-CSharp::RelationshipData
   lines:
-  - fromId: 
-    toId: 
-    lineColor: {r: 0, g: 0, b: 0, a: 0}
+  - fromId: "\u949F\u5FB7\u53D1"
+    toId: "\u9648\u5609\u4E50"
+    lineColor: {r: 0, g: 0, b: 0, a: 1}
+  - fromId: "\u949F\u5FB7\u53D1"
+    toId: "\u674E\u96E8\u6B23"
+    lineColor: {r: 0, g: 0, b: 0, a: 1}
+  - fromId: "\u949F\u5FB7\u53D1"
+    toId: "\u8C22\u96E8\u5F64"
+    lineColor: {r: 0, g: 0, b: 0, a: 1}
+  - fromId: "\u9AD8\u4E9A\u73CD"
+    toId: "\u8C22\u96E8\u5F64"
+    lineColor: {r: 0, g: 0, b: 0, a: 0.99607843}
+  - fromId: "\u8001\u516D"
+    toId: "\u949F\u5FB7\u53D1"
+    lineColor: {r: 0, g: 0, b: 0, a: 1}
+  - fromId: "\u6885\u4EC1\u4E49"
+    toId: "\u949F\u5FB7\u53D1"
+    lineColor: {r: 0, g: 0, b: 0, a: 1}
+  - fromId: "\u9648\u5609\u4E50"
+    toId: "\u9648\u5EFA\u519B"
+    lineColor: {r: 0, g: 0, b: 0, a: 1}
+  - fromId: "\u9648\u5609\u4E50"
+    toId: "\u5218\u6842\u82F1"
+    lineColor: {r: 0, g: 0, b: 0, a: 1}
+  - fromId: "\u9648\u5EFA\u519B"
+    toId: "\u9648\u5B88\u5C71"
+    lineColor: {r: 0, g: 0, b: 0, a: 1}
+  - fromId: "\u9648\u5EFA\u519B"
+    toId: "\u738B\u79C0\u83B2"
+    lineColor: {r: 0, g: 0, b: 0, a: 1}
+  - fromId: "\u674E\u96E8\u6B23"
+    toId: "\u5F20\u7FE0\u5170"
+    lineColor: {r: 0, g: 0, b: 0, a: 1}
+  - fromId: "\u674E\u96E8\u6B23"
+    toId: "\u674E\u5EFA\u56FD"
+    lineColor: {r: 0, g: 0, b: 0, a: 1}
+  - fromId: "\u8C22\u96E8\u5F64"
+    toId: "\u8C22\u660E\u8FDC"
+    lineColor: {r: 0, g: 0, b: 0, a: 1}
+  - fromId: "\u8C22\u96E8\u5F64"
+    toId: "\u6797\u5A49\u6E05"
+    lineColor: {r: 0, g: 0, b: 0, a: 1}
