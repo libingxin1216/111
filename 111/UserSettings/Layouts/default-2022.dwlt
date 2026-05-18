@@ -19,7 +19,7 @@ MonoBehaviour:
     width: 1079
     height: 897
   m_ShowMode: 4
-  m_Title: Hierarchy
+  m_Title: Game
   m_RootView: {fileID: 2}
   m_MinSize: {x: 875, y: 492}
   m_MaxSize: {x: 10000, y: 10000}
@@ -120,7 +120,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 100}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 3207
+  controlID: 75
   draggingID: 0
 --- !u!114 &6
 MonoBehaviour:
@@ -146,7 +146,7 @@ MonoBehaviour:
   m_MinSize: {x: 100, y: 100}
   m_MaxSize: {x: 8096, y: 16192}
   vertical: 1
-  controlID: 3153
+  controlID: 17
   draggingID: 0
 --- !u!114 &7
 MonoBehaviour:
@@ -636,9 +636,9 @@ MonoBehaviour:
   m_PlayAudio: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: 1136.0254, y: 567.5111, z: -7.5950704}
+    m_Target: {x: 819.0382, y: 608.8574, z: -7.5950704}
     speed: 2
-    m_Value: {x: 1136.0254, y: 567.5111, z: -7.5950704}
+    m_Value: {x: 819.0382, y: 608.8574, z: -7.5950704}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -929,7 +929,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/Font
+    - Assets/Scripts/Computer Screen
     m_Globs: []
     m_OriginalText: 
     m_ImportLogFlags: 0
@@ -937,16 +937,16 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 16
   m_LastFolders:
-  - Assets/Font
+  - Assets/Scripts/Computer Screen
   m_LastFoldersGridSize: 16
   m_LastProjectPath: D:\111\111
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
     scrollPos: {x: 0, y: 0}
-    m_SelectedIDs: b0660000
-    m_LastClickedID: 26288
-    m_ExpandedIDs: 00000000a0660000b8660000ba660000b267000000ca9a3bffffff7f
+    m_SelectedIDs: b4670000
+    m_LastClickedID: 26548
+    m_ExpandedIDs: 00000000626700007a67000000ca9a3bffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -974,7 +974,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 00000000a066000000ca9a3bffffff7f
+    m_ExpandedIDs: 0000000062670000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1005,18 +1005,18 @@ MonoBehaviour:
     m_ExpandedInstanceIDs: 506400003e6400005678000058c5ffffd6650000b0800000dcb50000f485000000000000407e0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
-      m_Name: 
-      m_OriginalName: 
+      m_Name: Computer Screen
+      m_OriginalName: Computer Screen
       m_EditFieldRect:
         serializedVersion: 2
         x: 0
         y: 0
         width: 0
         height: 0
-      m_UserData: 0
+      m_UserData: 26548
       m_IsWaitingForDelay: 0
       m_IsRenaming: 0
-      m_OriginalEventType: 11
+      m_OriginalEventType: 0
       m_IsRenamingFilename: 1
       m_ClientGUIView: {fileID: 8}
     m_CreateAssetUtility:
@@ -1067,9 +1067,9 @@ MonoBehaviour:
   m_SceneHierarchy:
     m_TreeViewState:
       scrollPos: {x: 0, y: 0}
-      m_SelectedIDs: 90f7ffff
-      m_LastClickedID: -2160
-      m_ExpandedIDs: e49fffff0aafffff54b0ffffe8b1ffffbcb3ffff8eb6ffffb0baffff20bcffff88bdffffe0beffff70c4ffff3ec7ffffdcc8ffff08ccffffcecdfffff8cfffff06d3ffff36e2ffffcae4ffff86e7ffff92eeffff9ef0ffffd4f1fffffcf3ffffa8f5ffff54f7ffff90f7ffff02f9ffff4af9ffff14fbffff
+      m_SelectedIDs: 1c660000
+      m_LastClickedID: 26140
+      m_ExpandedIDs: 14fbffff386500004a6500005e6500009c650000a2650000f26500001c660000306600009c660000ca660000
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 

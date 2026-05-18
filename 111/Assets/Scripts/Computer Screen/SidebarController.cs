@@ -8,7 +8,7 @@ public class SidebarController : MonoBehaviour
     [SerializeField] private Image[] icons;
     [SerializeField] private ContentFader fader;
 
-    void Start() => SwitchTo(0);
+   // void Start() => SwitchTo(0);
 
     public void SwitchTo(int index)
     {

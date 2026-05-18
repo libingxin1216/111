@@ -8,7 +8,7 @@ public class ComputerScreenController : MonoBehaviour
     void Awake()
     {
         Instance = this;
-        gameObject.SetActive(false);
+       // gameObject.SetActive(false);
     }
 
     public void Open()
