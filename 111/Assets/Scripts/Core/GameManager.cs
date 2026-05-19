@@ -22,6 +22,19 @@ public class GameManager : MonoBehaviour
     [Header("当前状态")]
     public string CurrentScene = "MainScene";
 
+    // 在GameManager.cs里添加：
+
+    [Header("人物照片解锁")]
+    // key=人物ID, value=照片Sprite
+    public Dictionary<string, Sprite> UnlockedPhotos = new Dictionary<string, Sprite>();
+
+    public void UnlockCharacterPhoto(string characterId, Sprite photo)
+    {
+        if (photo == null) return;
+        if (!UnlockedPhotos.ContainsKey(characterId))
+            UnlockedPhotos[characterId] = photo;
+    }
+
     void Awake()
     {
         // 单例模式，跨场景保活
