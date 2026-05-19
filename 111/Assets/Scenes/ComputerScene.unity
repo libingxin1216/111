@@ -2424,7 +2424,6 @@ GameObject:
   - component: {fileID: 1041774337}
   - component: {fileID: 1041774336}
   - component: {fileID: 1041774335}
-  - component: {fileID: 1041774338}
   m_Layer: 5
   m_Name: ' return button'
   m_TagString: Untagged
@@ -2546,19 +2545,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1041774333}
   m_CullTransparentMesh: 1
---- !u!114 &1041774338
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1041774333}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 215009e1732f741469b84ea371263dd2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  returnBtn: {fileID: 1041774335}
 --- !u!1 &1058383608
 GameObject:
   m_ObjectHideFlags: 0

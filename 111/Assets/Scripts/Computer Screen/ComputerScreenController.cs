@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class ComputerScreenController : MonoBehaviour
 {
@@ -19,7 +20,6 @@ public class ComputerScreenController : MonoBehaviour
 
     public void Close()
     {
-        gameObject.SetActive(false);
-        navigationBar.SetActive(true);
+        SceneManager.LoadScene("MainScene");
     }
 }
