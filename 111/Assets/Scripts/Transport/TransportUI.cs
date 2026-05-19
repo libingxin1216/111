@@ -7,48 +7,47 @@ using System.Collections.Generic;
 
 public class TransportUI : MonoBehaviour
 {
-    [Header("查询条件")]
+    [Header("两个Panel")]
+    public GameObject trainQueryPanel;      // 班次查询Panel
+    public GameObject passengerQueryPanel;  // 乘客查询Panel
+
+    [Header("班次查询Panel内")]
     public TMP_InputField departureInput;
     public TMP_InputField arrivalInput;
     public TMP_InputField dateInput;
     public Button[] typeButtons;
     public Button searchButton;
-
-    [Header("加载")]
     public GameObject loadingIndicator;
-
-    [Header("结果区域")]
     public GameObject noResultPanel;
-    public TextMeshProUGUI noResultText;
 
-    [Header("班次结果（直接平铺）")]
-    public GameObject trainResultArea;          // 默认隐藏
-    public TextMeshProUGUI trainResultText;     // 直接显示班次信息
-
-    [Header("乘客查询")]
-    public GameObject passengerQueryArea;       // 默认隐藏
+    [Header("乘客查询Panel内")]
+    public Button returnButton;
+    public Transform trainListArea;          // 班次列表容器
+    public GameObject trainButtonPrefab;     // 班次按钮预制体
+    public GameObject passengerSearchBar;    // 默认隐藏
     public TMP_InputField passengerInput;
     public Button passengerSearchButton;
-
-    [Header("乘客结果（直接平铺）")]
-    public GameObject passengerResultArea;      // 默认隐藏
-    public TextMeshProUGUI passengerResultText;
-    public GameObject passengerNoResultPanel;   // 默认隐藏
-    public TextMeshProUGUI passengerNoResultText;
+    public GameObject passengerResultArea;   // 默认隐藏
+    public Text passengerResultText;
+    public GameObject passengerNoResultPanel;// 默认隐藏
 
     private string selectedType = "全部";
     private TrainEntry selectedTrain = null;
+    private TrainButtonItem selectedTrainButton = null;
 
     void Start()
     {
+        // 初始状态
+        trainQueryPanel.SetActive(true);
+        passengerQueryPanel.SetActive(false);
         searchButton.interactable = false;
         loadingIndicator.SetActive(false);
         noResultPanel.SetActive(false);
-        trainResultArea.SetActive(false);
-        passengerQueryArea.SetActive(false);
+        passengerSearchBar.SetActive(false);
         passengerResultArea.SetActive(false);
         passengerNoResultPanel.SetActive(false);
 
+        // 输入框监听
         departureInput.onValueChanged.AddListener(_ => UpdateSearchButton());
         arrivalInput.onValueChanged.AddListener(_ => UpdateSearchButton());
         dateInput.onValueChanged.AddListener(_ => UpdateSearchButton());
@@ -56,6 +55,7 @@ public class TransportUI : MonoBehaviour
         dateInput.placeholder.GetComponent<TextMeshProUGUI>().text =
             "请输入日期（如2014-08-14）";
 
+        // 交通工具类型按钮
         string[] types = { "全部", "高铁", "普铁", "飞机", "汽车" };
         for (int i = 0; i < typeButtons.Length; i++)
         {
@@ -64,6 +64,7 @@ public class TransportUI : MonoBehaviour
         }
 
         searchButton.onClick.AddListener(OnClickSearch);
+        returnButton.onClick.AddListener(OnClickReturn);
         passengerSearchButton.onClick.AddListener(OnClickPassengerSearch);
     }
 
@@ -94,14 +95,7 @@ public class TransportUI : MonoBehaviour
 
     IEnumerator SearchCoroutine()
     {
-        // 重置所有区域
-        trainResultArea.SetActive(false);
         noResultPanel.SetActive(false);
-        passengerQueryArea.SetActive(false);
-        passengerResultArea.SetActive(false);
-        passengerNoResultPanel.SetActive(false);
-        selectedTrain = null;
-
         loadingIndicator.SetActive(true);
         searchButton.interactable = false;
 
@@ -120,38 +114,50 @@ public class TransportUI : MonoBehaviour
         if (results.Count == 0)
         {
             noResultPanel.SetActive(true);
-            noResultText.text = "未查询到符合条件的班次信息，请检查各项内容是否正确。";
         }
         else
         {
-            // 直接把所有班次信息拼成文字显示
-            string content = "";
+            // 清空旧班次列表
+            foreach (Transform child in trainListArea)
+                Destroy(child.gameObject);
+
+            // 重置乘客查询区域
+            selectedTrain = null;
+            selectedTrainButton = null;
+            passengerSearchBar.SetActive(false);
+            passengerResultArea.SetActive(false);
+            passengerNoResultPanel.SetActive(false);
+
+            // 生成班次按钮
             foreach (var train in results)
             {
-                content +=
-                    $"班次：{train.trainNumber}\n" +
-                    $"类型：{train.transportType}\n" +
-                    $"出发站：{train.departureStation}\n" +
-                    $"到达站：{train.arrivalStation}\n" +
-                    $"出发时间：{train.departureTime}\n" +
-                    $"到达时间：{train.arrivalTime}\n";
-
-                // 多条结果之间加分隔
-                if (results.Count > 1) content += "\n――――――――――\n\n";
-
+                var item = Instantiate(trainButtonPrefab, trainListArea);
+                var itemUI = item.GetComponent<TrainButtonItem>();
+                itemUI.Setup(train, OnSelectTrain);
                 TransportSystem.Instance.TriggerClue(train.triggerClueId);
             }
 
-            trainResultText.text = content;
-            trainResultArea.SetActive(true);
-
-            // 只有一条结果时直接选中，显示乘客查询
-            if (results.Count == 1)
-            {
-                selectedTrain = results[0];
-                passengerQueryArea.SetActive(true);
-            }
+            // 切换到乘客查询Panel
+            trainQueryPanel.SetActive(false);
+            passengerQueryPanel.SetActive(true);
         }
+    }
+
+    void OnSelectTrain(TrainEntry train, TrainButtonItem buttonItem)
+    {
+        // 取消上一个高亮
+        selectedTrainButton?.SetHighlight(false);
+
+        // 高亮当前选中
+        selectedTrain = train;
+        selectedTrainButton = buttonItem;
+        selectedTrainButton.SetHighlight(true);
+
+        // 显示乘客搜索框，清空旧结果
+        passengerSearchBar.SetActive(true);
+        passengerInput.text = "";
+        passengerResultArea.SetActive(false);
+        passengerNoResultPanel.SetActive(false);
     }
 
     void OnClickPassengerSearch()
@@ -167,7 +173,6 @@ public class TransportUI : MonoBehaviour
         {
             passengerResultArea.SetActive(false);
             passengerNoResultPanel.SetActive(true);
-            passengerNoResultText.text = "该姓名未在本次班次中查询到实名记录。";
         }
         else
         {
@@ -186,5 +191,12 @@ public class TransportUI : MonoBehaviour
 
             TransportSystem.Instance.TriggerClue(passenger.triggerClueId);
         }
+    }
+
+    void OnClickReturn()
+    {
+        // 回到班次查询Panel，保留之前输入的内容
+        passengerQueryPanel.SetActive(false);
+        trainQueryPanel.SetActive(true);
     }
 }
