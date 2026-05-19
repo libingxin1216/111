@@ -1,5 +1,6 @@
 // Assets/Scripts/MainScene/MainSceneController.cs
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class MainSceneController : MonoBehaviour
@@ -77,5 +78,13 @@ public class MainSceneController : MonoBehaviour
         // 播放门缝透光闪烁动画
         if (doorAnimator != null)
             doorAnimator.SetTrigger("DoorGlow");
+    }
+    public void GoToScene(string sceneName)
+    {
+        // 加载新场景前清空所有事件监听
+        // 各脚本的 OnDestroy 会在场景卸载时自动执行 Off，
+        // 但为了防止残留，在这里统一清理一次
+        EventBus.Clear();
+        SceneManager.LoadScene(sceneName);
     }
 }

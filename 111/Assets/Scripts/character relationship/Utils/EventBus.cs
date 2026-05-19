@@ -23,4 +23,10 @@ public static class EventBus
         if (listeners.ContainsKey(eventName))
             listeners[eventName]?.Invoke(data);
     }
+
+    // 保留 Clear 但不主动调用，只在确实需要完全重置时使用
+    public static void Clear()
+    {
+        listeners.Clear();
+    }
 }

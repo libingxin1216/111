@@ -10,7 +10,12 @@ public class LockSystem : MonoBehaviour
     private Dictionary<string, CharacterData> dataMap = new();
     private int currentStageIndex = 0;
 
-    void Awake() => Instance = this;
+    void Awake()
+    {
+        Instance = this;
+        if (stageConfig == null && RelationshipDataHolder.Instance != null)
+            stageConfig = RelationshipDataHolder.Instance.stageConfig;
+    }
 
     public void RegisterCharacter(CharacterData data)
     {
