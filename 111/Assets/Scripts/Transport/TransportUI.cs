@@ -1,4 +1,3 @@
-// Assets/Scripts/Transport/TransportUI.cs
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -8,8 +7,8 @@ using System.Collections.Generic;
 public class TransportUI : MonoBehaviour
 {
     [Header("两个Panel")]
-    public GameObject trainQueryPanel;      // 班次查询Panel
-    public GameObject passengerQueryPanel;  // 乘客查询Panel
+    public GameObject trainQueryPanel;
+    public GameObject passengerQueryPanel;
 
     [Header("班次查询Panel内")]
     public TMP_InputField departureInput;
@@ -19,25 +18,27 @@ public class TransportUI : MonoBehaviour
     public Button searchButton;
     public GameObject loadingIndicator;
     public GameObject noResultPanel;
+    public Button noResultReturnButton;      // ← 新增：NoResultPanel上的返回键
 
     [Header("乘客查询Panel内")]
     public Button returnButton;
-    public Transform trainListArea;          // 班次列表容器
-    public GameObject trainButtonPrefab;     // 班次按钮预制体
-    public GameObject passengerSearchBar;    // 默认隐藏
+    public Transform trainListArea;
+    public GameObject trainButtonPrefab;
+    public GameObject passengerSearchBar;
     public TMP_InputField passengerInput;
     public Button passengerSearchButton;
-    public GameObject passengerResultArea;   // 默认隐藏
+    public GameObject passengerResultArea;
     public Text passengerResultText;
-    public GameObject passengerNoResultPanel;// 默认隐藏
+    public GameObject passengerNoResultPanel;
+    public Button passengerNoResultReturnButton; // ← 新增：PassengerNoResultPanel上的返回键
 
-    private string selectedType = "全部";
+    private string selectedType = "";           // ← 改为空字符串，强制玩家选择
+    private int selectedTypeIndex = -1;         // ← 记录当前选中的按钮index，-1=未选
     private TrainEntry selectedTrain = null;
     private TrainButtonItem selectedTrainButton = null;
 
     void Start()
     {
-        // 初始状态
         trainQueryPanel.SetActive(true);
         passengerQueryPanel.SetActive(false);
         searchButton.interactable = false;
@@ -47,7 +48,6 @@ public class TransportUI : MonoBehaviour
         passengerResultArea.SetActive(false);
         passengerNoResultPanel.SetActive(false);
 
-        // 输入框监听
         departureInput.onValueChanged.AddListener(_ => UpdateSearchButton());
         arrivalInput.onValueChanged.AddListener(_ => UpdateSearchButton());
         dateInput.onValueChanged.AddListener(_ => UpdateSearchButton());
@@ -63,28 +63,53 @@ public class TransportUI : MonoBehaviour
             typeButtons[i].onClick.AddListener(() => OnSelectType(types[index], index));
         }
 
+        // 初始化所有类型按钮为灰色（未选中状态）
+        foreach (var btn in typeButtons)
+            btn.GetComponent<Image>().color = new Color(0.8f, 0.8f, 0.8f, 1f);
+
         searchButton.onClick.AddListener(OnClickSearch);
         returnButton.onClick.AddListener(OnClickReturn);
+
+        // NoResultPanel返回键
+        noResultReturnButton.onClick.AddListener(() =>
+        {
+            noResultPanel.SetActive(false);
+        });
+
+        // PassengerNoResultPanel返回键
+        passengerNoResultReturnButton.onClick.AddListener(() =>
+        {
+            passengerNoResultPanel.SetActive(false);
+        });
+
+        // 乘客查询：按钮 + 回车键
         passengerSearchButton.onClick.AddListener(OnClickPassengerSearch);
+        passengerInput.onSubmit.AddListener(_ => OnClickPassengerSearch());
     }
 
     void UpdateSearchButton()
     {
+        // 四项都必须填写，且必须选择了出行方式
         searchButton.interactable =
             !string.IsNullOrWhiteSpace(departureInput.text) &&
             !string.IsNullOrWhiteSpace(arrivalInput.text) &&
-            !string.IsNullOrWhiteSpace(dateInput.text);
+            !string.IsNullOrWhiteSpace(dateInput.text) &&
+            selectedTypeIndex != -1;             // ← 必须选了出行方式
     }
 
     void OnSelectType(string type, int index)
     {
         selectedType = type;
+        selectedTypeIndex = index;
+
+        // 高亮选中，其余灰色
         for (int i = 0; i < typeButtons.Length; i++)
         {
             typeButtons[i].GetComponent<Image>().color = (i == index)
                 ? new Color(0f, 0.4f, 0.9f, 1f)
                 : new Color(0.8f, 0.8f, 0.8f, 1f);
         }
+
         UpdateSearchButton();
     }
 
@@ -117,18 +142,15 @@ public class TransportUI : MonoBehaviour
         }
         else
         {
-            // 清空旧班次列表
             foreach (Transform child in trainListArea)
                 Destroy(child.gameObject);
 
-            // 重置乘客查询区域
             selectedTrain = null;
             selectedTrainButton = null;
             passengerSearchBar.SetActive(false);
             passengerResultArea.SetActive(false);
             passengerNoResultPanel.SetActive(false);
 
-            // 生成班次按钮
             foreach (var train in results)
             {
                 var item = Instantiate(trainButtonPrefab, trainListArea);
@@ -137,7 +159,6 @@ public class TransportUI : MonoBehaviour
                 TransportSystem.Instance.TriggerClue(train.triggerClueId);
             }
 
-            // 切换到乘客查询Panel
             trainQueryPanel.SetActive(false);
             passengerQueryPanel.SetActive(true);
         }
@@ -145,15 +166,11 @@ public class TransportUI : MonoBehaviour
 
     void OnSelectTrain(TrainEntry train, TrainButtonItem buttonItem)
     {
-        // 取消上一个高亮
         selectedTrainButton?.SetHighlight(false);
-
-        // 高亮当前选中
         selectedTrain = train;
         selectedTrainButton = buttonItem;
         selectedTrainButton.SetHighlight(true);
 
-        // 显示乘客搜索框，清空旧结果
         passengerSearchBar.SetActive(true);
         passengerInput.text = "";
         passengerResultArea.SetActive(false);
@@ -195,7 +212,6 @@ public class TransportUI : MonoBehaviour
 
     void OnClickReturn()
     {
-        // 回到班次查询Panel，保留之前输入的内容
         passengerQueryPanel.SetActive(false);
         trainQueryPanel.SetActive(true);
     }

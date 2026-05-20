@@ -28,3 +28,18 @@ MonoBehaviour:
       showFullId: 0
       triggerClueId: 
     triggerClueId: 
+  - trainNumber: G5580
+    departureStation: 1
+    arrivalStation: 1
+    date: 1
+    transportType: "\u9AD8\u94C1"
+    departureTime: 
+    arrivalTime: 
+    passengers:
+    - name: 1
+      seatNumber: 1
+      phone: 16659884237
+      idNumber: 1
+      showFullId: 0
+      triggerClueId: 
+    triggerClueId: 
