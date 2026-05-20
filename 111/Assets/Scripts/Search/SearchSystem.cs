@@ -19,8 +19,15 @@ public class SearchSystem : MonoBehaviour
     /// </summary>
     public List<SearchEntry> Search(string keyword)
     {
-        var collectedClues = GameManager.Instance?.CollectedClues
-                             ?? new HashSet<string>();
+        // 从ClueSystem获取已解锁线索ID集合
+        var collectedClues = new HashSet<string>();
+        if (ClueSystem.Instance != null)
+        {
+            var unlocked = ClueSystem.Instance.GetUnlockedClues();
+            foreach (var clue in unlocked)
+                collectedClues.Add(clue.clueId);
+        }
+
         return searchDatabase.Query(keyword, collectedClues);
     }
 
@@ -30,10 +37,10 @@ public class SearchSystem : MonoBehaviour
     /// </summary>
     public void OnDetailPageOpened(SearchEntry entry)
     {
-        // 触发新线索
+        // 触发新线索，通过ClueSystem解锁，内部会同步到GameManager
         if (!string.IsNullOrEmpty(entry.triggerClueId))
         {
-            GameManager.Instance?.AddClue(entry.triggerClueId);
+            ClueSystem.Instance?.UnlockClue(entry.triggerClueId);
             NewClueNotification.Instance?.ShowNotification("新线索已添加");
         }
 

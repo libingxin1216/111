@@ -1,0 +1,1 @@
+public enum ClueType { Text, Photo, IDCard, Receipt, Screenshot }
