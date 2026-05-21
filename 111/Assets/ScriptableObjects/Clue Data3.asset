@@ -12,10 +12,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25a467f052a5353488fbc4975aae05a3, type: 3}
   m_Name: Clue Data3
   m_EditorClassIdentifier: 
-  clueId: 
+  clueId: CLU_003
   clueType: 0
   thumbnail: {fileID: 0}
   fullImage: {fileID: 0}
   textContent: 
   prerequisiteClueId: 
   characterIdToUnlockPhoto: 
+  clueTitle: 
+  clueDate: 
+  clueLocation: 
+  clueSubtitle: 
+  receiptStoreName: 
+  receiptStoreAddress: 
+  receiptItems: []
+  receiptTotal: 
+  receiptCashier: 
+  faceHotspots: []
+  screenshotPlatform: 
+  isPhoneScreenshot: 1

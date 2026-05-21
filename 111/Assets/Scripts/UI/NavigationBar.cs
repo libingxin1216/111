@@ -2,64 +2,80 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
+/// <summary>
+/// 导航栏控制器（每个场景各有一个实例）。
+/// ── 变更摘要 ──────────────────────────────────────────────────────────
+/// 1. UpdateClueBadge(true) 时启动红点脉冲缩放动画
+/// 2. UpdateClueBadge(false) 时停止动画并恢复原始大小
+/// ─────────────────────────────────────────────────────────────────────
+/// </summary>
 public class NavigationBar : MonoBehaviour
 {
     public static NavigationBar Instance { get; private set; }
 
     [Header("导航按钮")]
-    public Button btnRelation;   // 人物关系图
-    public Button btnClue;       // 线索
-    public Button btnComputer;   // 电脑
-    public Button btnHome;       // 主界面(HOME)
-    public Button btnNotebook;   // 笔记本（叠加层，不切场景）
-    public Button btnSettings;   // 设置
+    public Button btnRelation;
+    public Button btnClue;
+    public Button btnComputer;
+    public Button btnHome;
+    public Button btnNotebook;
+    public Button btnSettings;
 
     [Header("红点提示")]
-    public GameObject clueBadge; // 线索按钮上的红点GameObject
+    public GameObject clueBadge;
 
     [Header("激活状态图片")]
-    // 每个按钮对应的激活底座图片，按顺序对应上面6个按钮
     public Image[] buttonHighlights;
 
     [Header("笔记本叠加层")]
-    public GameObject notebookOverlayPanel; // 笔记本Panel的GameObject
+    public GameObject notebookOverlayPanel;
 
-    private bool isNotebookOpen = false;
+    // ── 红点动画参数 ───────────────────────────────────────────────────
+    [Header("红点脉冲动画")]
+    [Tooltip("脉冲峰值缩放倍数（建议 1.25-1.40）")]
+    public float badgePulseScale = 1.30f;
+    [Tooltip("脉冲周期（秒）")]
+    public float badgePulsePeriod = 1.2f;
 
-    // 场景名称常量
-    const string SCENE_MAIN = "MainScene";
+    private bool    _isNotebookOpen;
+    private Coroutine _badgePulseCoroutine;
+
+    const string SCENE_MAIN     = "MainScene";
     const string SCENE_COMPUTER = "ComputerScene";
     const string SCENE_RELATION = "RelationScene";
-    const string SCENE_CLUE = "ClueScene";
+    const string SCENE_CLUE     = "ClueScene";
 
+    // ════════════════════════════════════════════════════════════════════
     void Awake()
     {
-        // 注意：导航栏每个场景都有一个实例，不做DontDestroyOnLoad
-        // 用静态Instance供外部调用当前场景的导航栏
         Instance = this;
     }
 
     void Start()
     {
-        btnRelation.onClick.AddListener(() => NavigateTo(SCENE_RELATION));
-        btnClue.onClick.AddListener(OnClickClue);
-        btnComputer.onClick.AddListener(OnClickComputer);
-        btnHome.onClick.AddListener(() => NavigateTo(SCENE_MAIN));
-        btnNotebook.onClick.AddListener(OnClickNotebook);
-        btnSettings.onClick.AddListener(OnClickSettings);
+        btnRelation?.onClick.AddListener(() => NavigateTo(SCENE_RELATION));
+        btnClue?.onClick.AddListener(OnClickClue);
+        btnComputer?.onClick.AddListener(OnClickComputer);
+        btnHome?.onClick.AddListener(() => NavigateTo(SCENE_MAIN));
+        btnNotebook?.onClick.AddListener(OnClickNotebook);
+        btnSettings?.onClick.AddListener(OnClickSettings);
 
-        // 根据当前场景高亮对应按钮
         UpdateHighlight();
 
-        // 同步红点状态
-        UpdateClueBadge(GameManager.Instance?.HasNewClue ?? false);
+        // 同步红点（场景加载后立即反映状态）
+        bool hasNew = GameManager.Instance?.HasNewClue ?? false;
+        UpdateClueBadge(hasNew);
 
-        // 电脑场景隐藏导航栏（文档要求）
+        // 电脑场景隐藏导航栏
         if (SceneManager.GetActiveScene().name == SCENE_COMPUTER)
             gameObject.SetActive(false);
     }
 
+    // ════════════════════════════════════════════════════════════════════
+    //  导航
+    // ════════════════════════════════════════════════════════════════════
     void NavigateTo(string sceneName)
     {
         if (SceneManager.GetActiveScene().name == sceneName) return;
@@ -69,45 +85,85 @@ public class NavigationBar : MonoBehaviour
     void OnClickClue()
     {
         GameManager.Instance?.ClearClueBadge();
+        // MainSceneController 上的文件夹红点也要清掉
+        FindObjectOfType<MainSceneController>()?.RefreshFolderBadge();
         NavigateTo(SCENE_CLUE);
     }
 
-    void OnClickComputer()
-    {
-        // 进入电脑场景后导航栏会自动隐藏（见Start逻辑）
-        NavigateTo(SCENE_COMPUTER);
-    }
+    void OnClickComputer() => NavigateTo(SCENE_COMPUTER);
 
     void OnClickNotebook()
     {
-        isNotebookOpen = !isNotebookOpen;
+        _isNotebookOpen = !_isNotebookOpen;
         if (notebookOverlayPanel != null)
-            notebookOverlayPanel.SetActive(isNotebookOpen);
+            notebookOverlayPanel.SetActive(_isNotebookOpen);
     }
 
     void OnClickSettings()
     {
-        // TODO: 弹出设置菜单（后续实现）
         Debug.Log("设置菜单（待实现）");
     }
 
-    /// <summary>
-    /// 更新线索红点显示
-    /// </summary>
+    // ════════════════════════════════════════════════════════════════════
+    //  红点管理
+    // ════════════════════════════════════════════════════════════════════
+
+    /// <summary>显示或隐藏线索红点，并控制脉冲动画。</summary>
     public void UpdateClueBadge(bool show)
     {
-        if (clueBadge != null)
-            clueBadge.SetActive(show);
+        if (clueBadge == null) return;
+        clueBadge.SetActive(show);
+
+        if (show)
+        {
+            if (_badgePulseCoroutine == null)
+                _badgePulseCoroutine = StartCoroutine(PulseBadge());
+        }
+        else
+        {
+            if (_badgePulseCoroutine != null)
+            {
+                StopCoroutine(_badgePulseCoroutine);
+                _badgePulseCoroutine = null;
+            }
+            clueBadge.transform.localScale = Vector3.one;
+        }
     }
 
-    /// <summary>
-    /// 根据当前场景高亮对应导航按钮
-    /// </summary>
+    IEnumerator PulseBadge()
+    {
+        float half = badgePulsePeriod * 0.5f;
+        while (clueBadge != null && clueBadge.activeSelf)
+        {
+            // 放大
+            float t = 0f;
+            while (t < 1f)
+            {
+                t = Mathf.Clamp01(t + Time.deltaTime / half);
+                float s = Mathf.Lerp(1f, badgePulseScale, t * t * (3f - 2f * t));
+                if (clueBadge != null) clueBadge.transform.localScale = Vector3.one * s;
+                yield return null;
+            }
+            // 缩小
+            t = 0f;
+            while (t < 1f)
+            {
+                t = Mathf.Clamp01(t + Time.deltaTime / half);
+                float s = Mathf.Lerp(badgePulseScale, 1f, t * t * (3f - 2f * t));
+                if (clueBadge != null) clueBadge.transform.localScale = Vector3.one * s;
+                yield return null;
+            }
+        }
+        if (clueBadge != null) clueBadge.transform.localScale = Vector3.one;
+        _badgePulseCoroutine = null;
+    }
+
+    // ════════════════════════════════════════════════════════════════════
+    //  高亮
+    // ════════════════════════════════════════════════════════════════════
     void UpdateHighlight()
     {
         if (buttonHighlights == null || buttonHighlights.Length < 4) return;
-
-        // 先全部关掉
         foreach (var img in buttonHighlights)
             if (img != null) img.enabled = false;
 
@@ -115,12 +171,11 @@ public class NavigationBar : MonoBehaviour
         int activeIndex = current switch
         {
             SCENE_RELATION => 0,
-            SCENE_CLUE => 1,
+            SCENE_CLUE     => 1,
             SCENE_COMPUTER => 2,
-            SCENE_MAIN => 3,
-            _ => -1
+            SCENE_MAIN     => 3,
+            _              => -1
         };
-
         if (activeIndex >= 0 && activeIndex < buttonHighlights.Length)
             buttonHighlights[activeIndex].enabled = true;
     }

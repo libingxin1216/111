@@ -64,14 +64,18 @@ public class GameManager : MonoBehaviour
     // 把GameManager里存的线索ID全部同步给ClueSystem
     public void SyncClueSystemIfExists()
     {
-        var clueSystem = FindObjectOfType<ClueSystem>();
+        // 优先使用静态 Instance（Awake 里赋值），避免因 GameObject 处于非激活
+        // 状态时 FindObjectOfType 返回 null 的问题。
+        var clueSystem = ClueSystem.Instance
+                      ?? FindObjectOfType<ClueSystem>(true);   // fallback
         if (clueSystem == null) return;
 
         foreach (var clueId in SavedUnlockedClueIds)
             clueSystem.RestoreClue(clueId);
 
-        // 同步完毕后通知CluePanelController刷新显示
-        var cluePanel = FindObjectOfType<CluePanelController>(true);
+        // 同步完毕后通知 CluePanelController 刷新显示
+        var cluePanel = CluePanelController.Instance
+                     ?? FindObjectOfType<CluePanelController>(true);  // fallback
         if (cluePanel != null)
             cluePanel.RefreshAllClues();
     }

@@ -20,6 +20,16 @@ public class SceneTransitionManager : MonoBehaviour
         }
         Instance = this;
         DontDestroyOnLoad(gameObject);
+
+        // fadeCanvasGroup 通常在场景内的 Canvas 上。
+        // 场景切换时该 Canvas 会被卸载，导致 Fade(1→0) 访问已销毁的对象。
+        // 解决方案：把 fadeCanvasGroup 所在的根 GameObject 也标为跨场景持久。
+        if (fadeCanvasGroup != null)
+        {
+            var rootGO = fadeCanvasGroup.transform.root.gameObject;
+            if (rootGO != this.gameObject)
+                DontDestroyOnLoad(rootGO);
+        }
     }
 
     /// <summary>
@@ -55,11 +65,15 @@ public class SceneTransitionManager : MonoBehaviour
 
         while (elapsed < fadeDuration)
         {
+            // 每帧检查：防止极端情况下对象被意外销毁
+            if (fadeCanvasGroup == null) yield break;
+
             elapsed += Time.deltaTime;
             fadeCanvasGroup.alpha = Mathf.Lerp(from, to, elapsed / fadeDuration);
             yield return null;
         }
 
+        if (fadeCanvasGroup == null) yield break;
         fadeCanvasGroup.alpha = to;
         if (to == 0f)
             fadeCanvasGroup.gameObject.SetActive(false);

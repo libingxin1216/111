@@ -1,6 +1,15 @@
 using UnityEngine;
 using System.Collections.Generic;
 
+/// <summary>
+/// 线索解锁系统。
+/// ── 变更摘要 ──────────────────────────────────────────────────────────
+/// 1. 新增 UnlockClueChain：专供"前置线索联动"调用。
+///    联动解锁时只设置 GameManager.HasNewClue = true + 导航红点，
+///    不弹通知条（静默解锁，玩家下次打开线索界面才发现）。
+/// 2. CheckChainUnlock 改为调用 UnlockClueChain，避免联动触发通知。
+/// ─────────────────────────────────────────────────────────────────────
+/// </summary>
 public class ClueSystem : MonoBehaviour
 {
     public static ClueSystem Instance;
@@ -12,9 +21,29 @@ public class ClueSystem : MonoBehaviour
     void Awake()
     {
         Instance = this;
+
+        // 保底：若 Inspector 里没有拖入 ClueData，尝试从已加载资源中自动获取
+        if (allClues == null || allClues.Length == 0)
+        {
+            allClues = Resources.FindObjectsOfTypeAll<ClueData>();
+            if (allClues.Length > 0)
+                Debug.Log($"[ClueSystem] allClues 未设置，自动加载了 {allClues.Length} 条 ClueData。" +
+                          "建议在 Inspector 中手动将 ScriptableObject 拖入 allClues 数组。");
+            else
+                Debug.LogWarning("[ClueSystem] allClues 为空且内存中找不到任何 ClueData！" +
+                                 "请在 ClueSystem 组件的 Inspector 中将所有 ClueData 资产拖入 allClues 数组。");
+        }
     }
 
-    // �����������̣���ǰ���������
+    // ════════════════════════════════════════════════════════════════════
+    //  主动解锁（含通知，供同事送达/搜索/数据库路径调用）
+    // ════════════════════════════════════════════════════════════════════
+
+    /// <summary>
+    /// 主动解锁一条线索（校验前置条件）。
+    /// 解锁成功后触发 EventBus "OnClueUnlocked" 事件。
+    /// 若有子线索满足联动条件，自动静默解锁子线索。
+    /// </summary>
     public void UnlockClue(string clueId)
     {
         if (unlockedClueIds.Contains(clueId)) return;
@@ -22,37 +51,76 @@ public class ClueSystem : MonoBehaviour
         var clue = System.Array.Find(allClues, c => c.clueId == clueId);
         if (clue == null) return;
 
+        // 检查前置条件
         if (!string.IsNullOrEmpty(clue.prerequisiteClueId)
             && !unlockedClueIds.Contains(clue.prerequisiteClueId)) return;
 
         unlockedClueIds.Add(clueId);
-
-        // ͬʱ����GameManager�־û�
         GameManager.Instance?.AddClueToSave(clueId);
-
         EventBus.Emit("OnClueUnlocked", clueId);
 
+        // 触发子线索联动（静默）
         CheckChainUnlock(clueId);
     }
 
-    // �ָ����̣��糡���ã�����ǰ��������飬���ظ����¼�
-    public void RestoreClue(string clueId)
+    // ════════════════════════════════════════════════════════════════════
+    //  静默联动解锁（不触发通知条，只更新红点）
+    // ════════════════════════════════════════════════════════════════════
+
+    /// <summary>
+    /// 前置线索联动：静默解锁，不弹通知，仅设置导航红点。
+    /// 玩家下次打开线索板时会发现新线索（带红点指示器）。
+    /// </summary>
+    public void UnlockClueChain(string clueId)
     {
         if (unlockedClueIds.Contains(clueId)) return;
 
         var clue = System.Array.Find(allClues, c => c.clueId == clueId);
         if (clue == null) return;
 
+        // 联动解锁不检查前置（前置已在 CheckChainUnlock 里验证）
         unlockedClueIds.Add(clueId);
-        // ע�⣺���ﲻ��EventBus�¼�����GameManagerͳһˢ�����
+        GameManager.Instance?.AddClueToSave(clueId);
+
+        // 仅更新红点，不发通知条
+        if (GameManager.Instance != null) GameManager.Instance.HasNewClue = true;
+        NavigationBar.Instance?.UpdateClueBadge(true);
+
+        // EventBus 通知 CluePanelController（若当前在线索场景则追加缩略图）
+        EventBus.Emit("OnClueUnlocked", clueId);
+
+        // 递归处理更深层联动
+        CheckChainUnlock(clueId);
     }
+
+    // ════════════════════════════════════════════════════════════════════
+    //  恢复（场景切换后同步）
+    // ════════════════════════════════════════════════════════════════════
+
+    /// <summary>跨场景恢复：直接恢复不再触发事件。</summary>
+    public void RestoreClue(string clueId)
+    {
+        if (unlockedClueIds.Contains(clueId)) return;
+        var clue = System.Array.Find(allClues, c => c.clueId == clueId);
+        if (clue == null) return;
+        unlockedClueIds.Add(clueId);
+        // 不触发 EventBus，由 GameManager.SyncClueSystemIfExists → RefreshAllClues 统一刷新
+    }
+
+    // ════════════════════════════════════════════════════════════════════
+    //  联动检查（改调 UnlockClueChain）
+    // ════════════════════════════════════════════════════════════════════
 
     void CheckChainUnlock(string justUnlockedId)
     {
         foreach (var clue in allClues)
             if (clue.prerequisiteClueId == justUnlockedId)
-                UnlockClue(clue.clueId);
+                UnlockClueChain(clue.clueId);
     }
+
+    // ════════════════════════════════════════════════════════════════════
+    //  查询
+    // ════════════════════════════════════════════════════════════════════
 
     public bool HasClue(string clueId) => unlockedClueIds.Contains(clueId);
 

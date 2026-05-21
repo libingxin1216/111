@@ -19,3 +19,23 @@ MonoBehaviour:
   textContent: 
   prerequisiteClueId: 
   characterIdToUnlockPhoto: 
+  clueTitle: 
+  clueDate: 
+  clueLocation: 
+  clueSubtitle: 
+  receiptStoreName: 
+  receiptStoreAddress: 
+  receiptItems: []
+  receiptTotal: 
+  receiptCashier: 
+  faceHotspots:
+  - normalizedRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
+    characterId: 
+    characterPhoto: {fileID: 0}
+  screenshotPlatform: 
+  isPhoneScreenshot: 1
