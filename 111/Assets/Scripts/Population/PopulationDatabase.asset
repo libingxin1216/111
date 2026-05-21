@@ -1,0 +1,200 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed045a21f0040444285e74c17942de6b, type: 3}
+  m_Name: PopulationDatabase
+  m_EditorClassIdentifier: 
+  entries:
+  - name: "\u9648\u5609\u4E50"
+    gender: "\u7537"
+    birthday: "2005\u5E746\u670812\u65E5"
+    idNumber: 451000200506120317
+    phone: 17842369811
+    address: 
+    identities:
+    - "\u5C0F\u5B66\u751F"
+    - "\u53D7\u5BB3\u4EBA"
+    photo: {fileID: 0}
+    remarks: []
+    hasDuplicate: 1
+    triggerClueId: 
+  - name: "\u9648\u5EFA\u519B"
+    gender: "\u7537"
+    birthday: "1980\u5E743\u67085\u65E5"
+    idNumber: 45100019800305123X
+    phone: 17865238915
+    address: 
+    identities:
+    - "\u5DE5\u4EBA"
+    photo: {fileID: 0}
+    remarks: []
+    hasDuplicate: 1
+    triggerClueId: 
+  - name: "\u5218\u6842\u82F1"
+    gender: "\u5973"
+    birthday: "1982\u5E749\u670818\u65E5"
+    idNumber: 451021198209184562
+    phone: 17815632179
+    address: 
+    identities:
+    - "\u5DE5\u4EBA"
+    photo: {fileID: 0}
+    remarks: []
+    hasDuplicate: 0
+    triggerClueId: 
+  - name: "\u9648\u5B88\u5C71"
+    gender: "\u7537"
+    birthday: "1951\u5E7411\u67087\u65E5"
+    idNumber: 451000195111077893
+    phone: 16533486791
+    address: 
+    identities:
+    - "\u519C\u6C11"
+    photo: {fileID: 0}
+    remarks: []
+    hasDuplicate: 0
+    triggerClueId: 
+  - name: "\u738B\u79C0\u83B2"
+    gender: "\u5973"
+    birthday: "1953\u5E744\u670823\u65E5"
+    idNumber: 451024195304232348
+    phone: 16587332495
+    address: 
+    identities:
+    - "\u519C\u6C11"
+    photo: {fileID: 0}
+    remarks: []
+    hasDuplicate: 1
+    triggerClueId: 
+  - name: "\u674E\u96E8\u6B23"
+    gender: "\u5973"
+    birthday: "2005\u5E748\u670820\u65E5"
+    idNumber: 441500200508201401
+    phone: 16587112956
+    address: 
+    identities:
+    - "\u5C0F\u5B66\u751F"
+    - "\u53D7\u5BB3\u8005"
+    photo: {fileID: 0}
+    remarks: []
+    hasDuplicate: 0
+    triggerClueId: 
+  - name: "\u5F20\u7FE0\u5170"
+    gender: "\u5973"
+    birthday: "1978\u5E7410\u670815\u65E5"
+    idNumber: 441500197810153406
+    phone: 16578953256
+    address: 
+    identities:
+    - "\u5546\u8D29"
+    photo: {fileID: 0}
+    remarks: []
+    hasDuplicate: 1
+    triggerClueId: 
+  - name: "\u674E\u5EFA\u56FD"
+    gender: "\u7537"
+    birthday: "1976\u5E747\u67088\u65E5"
+    idNumber: 441500197607088911
+    phone: 14689562798
+    address: 
+    identities:
+    - "\u5DE5\u4EBA"
+    photo: {fileID: 0}
+    remarks: []
+    hasDuplicate: 0
+    triggerClueId: 
+  - name: "\u8C22\u96E8\u5F64"
+    gender: "\u5973"
+    birthday: "2006\u5E745\u670818\u65E5"
+    idNumber: 421200200605182463
+    phone: 19835674465
+    address: 
+    identities:
+    - "\u5C0F\u5B66\u751F"
+    - "\u53D7\u5BB3\u8005"
+    photo: {fileID: 0}
+    remarks: []
+    hasDuplicate: 0
+    triggerClueId: 
+  - name: "\u8C22\u660E\u8FDC"
+    gender: "\u7537"
+    birthday: "1979\u5E744\u670810\u65E5"
+    idNumber: 42120019790410357X
+    phone: 19824671756
+    address: 
+    identities:
+    - "\u4E2D\u5B66\u6559\u5E08"
+    photo: {fileID: 0}
+    remarks: []
+    hasDuplicate: 1
+    triggerClueId: 
+  - name: "\u6797\u5A49\u6E05"
+    gender: "\u5973"
+    birthday: "1981\u5E747\u670822\u65E5"
+    idNumber: 411321198107225684
+    phone: 19835688945
+    address: 
+    identities:
+    - "\u5C0F\u5B66\u6559\u5E08"
+    photo: {fileID: 0}
+    remarks: []
+    hasDuplicate: 0
+    triggerClueId: 
+  - name: "\u949F\u5FB7\u53D1"
+    gender: "\u7537"
+    birthday: "1978\u5E743\u670812\u65E5"
+    idNumber: 410700197803124715
+    phone: 15789567456
+    address: 
+    identities:
+    - "\u65E0\u4E1A\u4EBA\u5458"
+    photo: {fileID: 0}
+    remarks:
+    - "\u5931\u4FE1\u88AB\u6267\u884C\u4EBA"
+    - "\u72AF\u7F6A\u5ACC\u7591\u4EBA"
+    hasDuplicate: 0
+    triggerClueId: 
+  - name: "\u9AD8\u4E9A\u73CD"
+    gender: "\u5973"
+    birthday: "1985\u5E7411\u67083\u65E5"
+    idNumber: 310115197511036248
+    phone: 16659884237
+    address: 
+    identities: []
+    photo: {fileID: 0}
+    remarks:
+    - "\u72AF\u7F6A\u5ACC\u7591\u4EBA"
+    hasDuplicate: 1
+    triggerClueId: 
+  - name: "\u8001\u516D"
+    gender: "\u7537"
+    birthday: "1972\u5E748\u670817\u65E5"
+    idNumber: 13020519720817395X
+    phone: 18185166978
+    address: 
+    identities: []
+    photo: {fileID: 0}
+    remarks:
+    - "\u72AF\u7F6A\u5ACC\u7591\u4EBA"
+    hasDuplicate: 0
+    triggerClueId: 
+  - name: "\u6885\u4EC1\u4E49"
+    gender: "\u5973"
+    birthday: "1968\u5E745\u670829\u65E5"
+    idNumber: 120106196805295826
+    phone: 13659874562
+    address: 
+    identities: []
+    photo: {fileID: 0}
+    remarks:
+    - "\u72AF\u7F6A\u5ACC\u7591\u4EBA"
+    hasDuplicate: 1
+    triggerClueId: 

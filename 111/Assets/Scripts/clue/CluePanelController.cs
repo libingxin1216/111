@@ -121,7 +121,7 @@ public class CluePanelController : MonoBehaviour
 
         var notebook = FindObjectOfType<NotebookOverlay>(true);
         if (notebook != null)
-            notebook.AppendToNotebook(content, currentDetailClue.clueId);
+            notebook.AppendText(content, currentDetailClue.clueId);
     }
 
     public void OpenCluePanel() => gameObject.SetActive(true);

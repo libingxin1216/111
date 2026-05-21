@@ -12,7 +12,7 @@ public class GameManager : MonoBehaviour
     public HashSet<string> UnlockedSearchTerms = new HashSet<string>();
     public Dictionary<string, CharacterProgress> CharacterProgressMap
         = new Dictionary<string, CharacterProgress>();
-    public string NotebookContent = "";
+    public List<NotebookTabData> NotebookTabs = new List<NotebookTabData>();
     public bool HasNewClue = false;
 
     [Header("当前状态")]
@@ -27,6 +27,10 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
             return;
+
+            // 初始化默认标签
+            if (NotebookTabs.Count == 0)
+                NotebookTabs.Add(new NotebookTabData("默认笔记"));
         }
         Instance = this;
         DontDestroyOnLoad(gameObject);
