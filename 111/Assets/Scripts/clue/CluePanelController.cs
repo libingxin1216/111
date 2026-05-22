@@ -145,14 +145,10 @@ public class CluePanelController : MonoBehaviour
     }
 
     /// <summary>
-    /// 获取支持中文的 TMP 字体。
-    /// 优先使用 ClueCardRenderer 已注入的字体（由 ClueCardConfig 在 Awake 设置），
-    /// 其次读 ClueCardConfig.chineseFont，最后退回 TMP 默认字体。
+    /// 获取支持中文的 TMP 字体（委托给 GameManager 统一入口）。
     /// </summary>
     static TMPro.TMP_FontAsset GetChineseFont()
-        => ClueCardRenderer.GetFont()
-        ?? ClueCardConfig.Instance?.chineseFont
-        ?? TMPro.TMP_Settings.defaultFontAsset;
+        => GameManager.GetChineseFont();
 
     /// <summary>
     /// 若 closeDetailBtn / markToNoteBtn 处于 ScrollRect 或 Mask 的内部，
@@ -521,35 +517,73 @@ public class CluePanelController : MonoBehaviour
 
     void MarkSelectedTextToNote()
     {
-        var notebook = FindObjectOfType<NotebookOverlay>(true);
-        if (notebook == null || _currentClue == null) return;
+        if (_currentClue == null) return;
 
-        bool useRenderer = (ClueCardConfig.Instance != null && ClueCardConfig.Instance.useCardRenderer);
+        // ── 确定要写入的内容 ─────────────────────────────────────────
+        bool useRenderer = ClueCardConfig.Instance != null && ClueCardConfig.Instance.useCardRenderer;
         string content;
         string sourceLabel;
 
         if (useRenderer && !string.IsNullOrWhiteSpace(_currentSelection))
         {
-            // 程序化模式：标记选中文字
             content     = _currentSelection;
             sourceLabel = !string.IsNullOrEmpty(_currentClue.clueTitle)
-                        ? _currentClue.clueTitle
-                        : _currentClue.clueId;
+                        ? _currentClue.clueTitle : _currentClue.clueId;
         }
         else
         {
-            // Fallback：标记整条内容
-            content = _currentClue.clueType == ClueType.Text
-                    ? _currentClue.textContent
-                    : $"[图片线索：{_currentClue.clueId}]";
+            content     = _currentClue.clueType == ClueType.Text
+                        ? _currentClue.textContent
+                        : $"[图片线索：{_currentClue.clueId}]";
             sourceLabel = _currentClue.clueId;
         }
 
-        notebook.AppendText(content, sourceLabel);
+        if (string.IsNullOrWhiteSpace(content)) return;
 
-        // 短暂高亮按钮给玩家反馈
+        // ── 写入笔记 ─────────────────────────────────────────────────
+        // 方案 A：NotebookOverlay 在当前场景（如果笔记本叠加层打开着）
+        var notebookOverlay = NotebookOverlay.Instance
+                           ?? FindObjectOfType<NotebookOverlay>(true);
+        if (notebookOverlay != null)
+        {
+            notebookOverlay.AppendText(content, sourceLabel);
+        }
+        else
+        {
+            // 方案 B：跨场景（ClueScene → 笔记在 MainScene）
+            // 直接写入 GameManager.NotebookTabs，回到主界面打开笔记本时自动加载
+            AppendToNotebookPersistent(content, sourceLabel);
+        }
+
+        // ── 玩家反馈 ─────────────────────────────────────────────────
         if (markToNoteBtn != null)
             StartCoroutine(FlashButton(markToNoteBtn));
+    }
+
+    /// <summary>
+    /// 跨场景写笔记：直接修改 GameManager.NotebookTabs（DontDestroyOnLoad）。
+    /// NotebookOverlay.OnEnable() 每次打开都会从 GameManager 加载，
+    /// 因此此处写入的内容在主界面打开笔记本时一定会显示。
+    /// </summary>
+    void AppendToNotebookPersistent(string text, string sourceLabel)
+    {
+        if (GameManager.Instance == null)
+        {
+            Debug.LogWarning("[CluePanelController] GameManager.Instance 为 null，笔记写入失败");
+            return;
+        }
+
+        var tabs = GameManager.Instance.NotebookTabs;
+
+        // 若还没有任何 Tab，创建一个默认 Tab
+        if (tabs.Count == 0)
+            tabs.Add(new NotebookTabData("默认笔记"));
+
+        // 追加到第一个（默认）Tab；格式与 NotebookOverlay.AppendText 保持一致
+        string appendText = $"\n\n【来自 {sourceLabel}】\n{text}";
+        tabs[0].content  += appendText;
+
+        Debug.Log($"[笔记] 已跨场景写入笔记本（来自 {sourceLabel}）");
     }
 
     System.Collections.IEnumerator FlashButton(Button btn)

@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
@@ -20,6 +21,32 @@ public class GameManager : MonoBehaviour
 
     [Header("人物照片解锁")]
     public Dictionary<string, Sprite> UnlockedPhotos = new Dictionary<string, Sprite>();
+
+    [Header("全局中文字体（拖入 SIMHEI.asset，所有场景共用）")]
+    [Tooltip("拖入 Assets/Font/SIMHEI.asset（或其他含中文字形的 TMP SDF 字体）。\n" +
+             "GameManager 是 DontDestroyOnLoad，所有场景均可从此处获取字体。")]
+    public TMP_FontAsset chineseFont;
+
+    /// <summary>
+    /// 获取中文字体：优先用 GameManager 字段，其次从 ClueCardRenderer 取。
+    /// 任何脚本均可调用此静态方法，无需关心当前场景。
+    /// </summary>
+    public static TMP_FontAsset GetChineseFont()
+    {
+        // 1. GameManager（DontDestroyOnLoad，全场景可用）
+        if (Instance != null && Instance.chineseFont != null)
+            return Instance.chineseFont;
+        // 2. ClueCardRenderer 注入的字体（ClueScene 有效）
+        var rendererFont = ClueCardRenderer.GetFont();
+        if (rendererFont != null) return rendererFont;
+        // 3. 内存中已加载的 SIMHEI（场景引用过的情况）
+        foreach (var f in Resources.FindObjectsOfTypeAll<TMP_FontAsset>())
+            if (f != null && (f.name.IndexOf("SIMHEI", System.StringComparison.OrdinalIgnoreCase) >= 0
+                           || f.name.IndexOf("黑", System.StringComparison.OrdinalIgnoreCase) >= 0))
+                return f;
+        // 4. 最终回退 TMP 默认字体
+        return TMP_Settings.defaultFontAsset;
+    }
 
     void Awake()
     {

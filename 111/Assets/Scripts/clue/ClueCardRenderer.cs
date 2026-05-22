@@ -307,6 +307,15 @@ public static class ClueCardRenderer
             Pos(l, 5, H / 2 - 118 - i * 26);
         }
 
+        // ── 操作提示（告知玩家可以拖选文字）──
+        if (onTextSelected != null)
+        {
+            var hintRt = MakeRect(root, "SelectHint", W - 40, 20, Color.clear);
+            Pos(hintRt, 0, H / 2 - 64 - 26 - 14);   // meta 行下方
+            MakeTMP(hintRt, "📌 拖拽鼠标选中文字，可标记到笔记",
+                7f, new Color32(120, 130, 160, 180), TextAlignmentOptions.Center, W - 40, 18);
+        }
+
         // ── 正文（可选中 TMP_InputField） ──
         var ifGo = BuildReadonlyInputField(root,
             !string.IsNullOrEmpty(clue.textContent) ? clue.textContent : "(暂无内容)",
@@ -701,8 +710,17 @@ public static class ClueCardRenderer
         inputField.richText       = false;
         inputField.lineType       = TMP_InputField.LineType.MultiLineNewline;
         // multiLine 是只读属性，由 lineType = MultiLineNewline 自动设置
-        inputField.selectionColor = new Color32(52, 144, 220, 90);
-        inputField.caretWidth     = 0;
+
+        // 选中高亮色：蓝色半透明，让玩家清楚看到已选区域
+        inputField.selectionColor = new Color32(52, 144, 220, 120);
+
+        // caretWidth 必须 ≥ 1，否则部分 TMP 版本在 readonly 模式下
+        // 不会正确进入选择状态，导致 selectionAnchorPosition 始终 == selectionFocusPosition
+        inputField.caretWidth     = 1;
+        inputField.caretColor     = new Color(0, 0, 0, 0);   // 光标透明，不干扰阅读
+
+        // 确保文字组件可以接收射线（鼠标点击/拖拽）
+        tmp.raycastTarget = true;
 
         return rootGo;
     }

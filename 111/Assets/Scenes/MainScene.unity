@@ -2037,6 +2037,7 @@ MonoBehaviour:
   NotebookTabs: []
   HasNewClue: 0
   CurrentScene: MainScene
+  chineseFont: {fileID: 11400000, guid: ad801dc4ebff2024e8a43f69bc20824e, type: 2}
 --- !u!4 &1743754340
 Transform:
   m_ObjectHideFlags: 0

@@ -70,6 +70,13 @@ public class NotebookOverlay : MonoBehaviour
         // 确保currentTabIndex合法
         currentTabIndex = Mathf.Clamp(currentTabIndex, 0, tabs.Count - 1);
 
+        // ⚠️ 必须在 SelectTab 之前设置 skipNextSave = true。
+        // 原因：SelectTab 开头会调用 SaveCurrentTab()，它会把当前
+        //       contentInputField.text（此时为空或旧值）写回 GameManager，
+        //       覆盖掉从 ClueScene 跨场景写入的内容。
+        // skipNextSave = true 让这次 SaveCurrentTab() 直接跳过，
+        // SelectTab 随后再从 GameManager 加载最新内容到输入框，保证数据不丢失。
+        skipNextSave = true;
         SelectTab(currentTabIndex);
     }
 

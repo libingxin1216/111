@@ -30,13 +30,42 @@ public class CharacterCard : MonoBehaviour
 
     void Start()
     {
+        // 若 currentName 仍为空，但 ScriptableObject 里已配置了 prefilledName，
+        // 自动填入（避免需要手动调用 ResetRuntimeData）
+        if (data != null
+            && string.IsNullOrEmpty(data.currentName)
+            && !string.IsNullOrEmpty(data.prefilledName))
+        {
+            data.currentName = data.prefilledName;
+        }
+
         // 场景每次加载时，从 GameManager 恢复跨场景解锁的照片
         TryLoadPhotoFromGameManager();
+        // 把中文字体应用到所有 TMP 组件（防止方块字）
+        ApplyChineseFont();
         RefreshDisplay();
         nameButton?.onClick.AddListener(OnClickNameField);
         roleButton?.onClick.AddListener(OnClickRoleField);
         EventBus.On("OnPhotoUnlocked", OnPhotoUnlocked);
         EventBus.On("OnCharacterLocked", OnCharacterLocked);
+    }
+
+    /// <summary>
+    /// 从 GameManager 获取中文字体，应用到卡片上的所有 TMP 文字组件。
+    /// 调用时机：Start()（初始化）+ RefreshDisplay()（徽章动态创建后）。
+    /// </summary>
+    void ApplyChineseFont()
+    {
+        var font = GameManager.GetChineseFont();
+        if (font == null) return;
+
+        if (nameText != null) nameText.font = font;
+        if (roleText != null) roleText.font = font;
+
+        // 徽章组内的所有 TMP（动态生成，RefreshDisplay 之后调用）
+        if (badgeGroup != null)
+            foreach (var tmp in badgeGroup.GetComponentsInChildren<TextMeshProUGUI>(true))
+                tmp.font = font;
     }
 
     /// <summary>
@@ -64,12 +93,25 @@ public class CharacterCard : MonoBehaviour
     public void RefreshDisplay()
     {
         if (nameText != null)
-            nameText.text = string.IsNullOrEmpty(data.currentName)
-                          ? "������" : data.currentName;
+        {
+            // 优先显示 currentName（玩家已填写），
+            // 其次 prefilledName（ScriptableObject 预设），
+            // 均为空则显示 "???"（提示玩家待调查）
+            string displayName = !string.IsNullOrEmpty(data.currentName)
+                               ? data.currentName
+                               : (!string.IsNullOrEmpty(data.prefilledName)
+                                  ? data.prefilledName
+                                  : "???");
+            nameText.text = displayName;
+        }
 
         if (roleText != null)
+        {
+            // 角色同理：已填写则显示，否则显示 "???"
             roleText.text = string.IsNullOrEmpty(data.currentRole)
-                          ? "������" : data.currentRole;
+                          ? "???"
+                          : data.currentRole;
+        }
 
         if (photoImage != null)
         {
@@ -83,16 +125,22 @@ public class CharacterCard : MonoBehaviour
             if (hasPhoto) photoImage.sprite = displayPhoto;
         }
 
-        // Badge ��̬���
+        // Badge 动态创建
         if (badgeGroup != null && badgePrefab != null)
         {
             foreach (Transform child in badgeGroup)
                 Destroy(child.gameObject);
+
+            var font = GameManager.GetChineseFont();
             foreach (var label in data.badgeLabels)
             {
                 var badge = Instantiate(badgePrefab, badgeGroup);
-                var tmp = badge.GetComponentInChildren<TextMeshProUGUI>();
-                if (tmp != null) tmp.text = label;
+                var tmp   = badge.GetComponentInChildren<TextMeshProUGUI>();
+                if (tmp != null)
+                {
+                    tmp.text = label;
+                    if (font != null) tmp.font = font;  // 应用中文字体
+                }
             }
         }
     }
