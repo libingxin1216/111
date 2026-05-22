@@ -33,6 +33,10 @@ public class CluePanelController : MonoBehaviour
     [Tooltip("程序化生成的全屏卡片 UI 会放到这里。推荐在 detailOverlay 内创建一个 'CardRoot' 空 GameObject 并拖入。")]
     [SerializeField] private RectTransform cardBuildParent;
 
+    [Header("★ 返回主界面按钮（留空时自动在左上角创建）")]
+    [Tooltip("指向场景中已有的返回按钮；若未赋值，运行时在 Canvas 左上角自动生成。")]
+    [SerializeField] private Button returnToMainBtn;
+
     // ── 滚动支持 ──────────────────────────────────────────────────────
     [Header("可选：滚动容器（把 cardBuildParent 放进 ScrollRect 的 content 里）")]
     [SerializeField] private ScrollRect detailScrollRect;
@@ -51,21 +55,104 @@ public class CluePanelController : MonoBehaviour
     {
         Instance = this;
         detailOverlay.SetActive(false);
+
+        // markToNoteBtn 不涉及字体，可在 Awake 安全配置
         if (markToNoteBtn != null)
         {
             markToNoteBtn.gameObject.SetActive(false);
             markToNoteBtn.onClick.AddListener(MarkSelectedTextToNote);
         }
 
-        // 若 Inspector 未连线，自动创建关闭按钮，确保玩家始终有路退出
-        EnsureDetailCloseButtons();
-
-        // 将关闭/标记按钮移到 detailOverlay 直接子层，避免被 ScrollRect / Mask 裁切
-        FixDetailButtonPositions();
-
-        closeDetailBtn?.onClick.AddListener(CloseDetail);
-        backdropBtn?.onClick.AddListener(CloseDetail);
+        // ⚠️ 按钮创建（EnsureDetailCloseButtons / EnsureReturnButton）已移至 Start()
+        // 原因：创建 TMP 文字时需要从 ClueCardConfig 读取中文字体，
+        //       而 ClueCardConfig.Awake() 可能在本 Awake() 之后才执行，
+        //       导致字体为 null → 中文方块。
+        // Unity 保证：所有脚本的 Awake() 全部结束后才进入 Start()，
+        //       因此在 Start() 中调用可 100% 拿到正确字体。
     }
+
+    // ════════════════════════════════════════════════════════════════════
+    //  返回主界面按钮
+    // ════════════════════════════════════════════════════════════════════
+
+    /// <summary>
+    /// 若 returnToMainBtn 已在 Inspector 连线则直接绑定事件；
+    /// 否则在场景 Canvas 左上角自动创建一个"← 主界面"按钮。
+    /// </summary>
+    void EnsureReturnButton()
+    {
+        if (returnToMainBtn != null)
+        {
+            // Inspector 已有按钮，直接绑定
+            returnToMainBtn.onClick.AddListener(OnReturnToMain);
+            return;
+        }
+
+        // ── 找到合适的 Canvas 父节点 ────────────────────────────────
+        Canvas canvas = GetComponentInParent<Canvas>();
+        if (canvas == null) canvas = FindObjectOfType<Canvas>();
+        if (canvas == null) { Debug.LogWarning("[CluePanelController] 找不到 Canvas，无法创建返回按钮"); return; }
+
+        // ── 创建按钮 GO ──────────────────────────────────────────────
+        var go = new GameObject("_AutoReturnBtn");
+        go.transform.SetParent(canvas.transform, false);
+
+        var rt        = go.AddComponent<RectTransform>();
+        rt.anchorMin  = new Vector2(0, 1);
+        rt.anchorMax  = new Vector2(0, 1);
+        rt.pivot      = new Vector2(0, 1);
+        rt.sizeDelta  = new Vector2(140, 46);
+        rt.anchoredPosition = new Vector2(16, -16);
+
+        var img            = go.AddComponent<Image>();
+        img.color          = new Color(0.08f, 0.08f, 0.08f, 0.80f);
+        img.raycastTarget  = true;
+
+        // ── "← 主界面" 标签 ─────────────────────────────────────────
+        var labelGo = new GameObject("Label");
+        labelGo.transform.SetParent(go.transform, false);
+        var labelRt   = labelGo.AddComponent<RectTransform>();
+        labelRt.anchorMin = Vector2.zero;
+        labelRt.anchorMax = Vector2.one;
+        labelRt.sizeDelta = Vector2.zero;
+        var tmp           = labelGo.AddComponent<TMPro.TextMeshProUGUI>();
+        tmp.text          = "←  主界面";
+        tmp.fontSize      = 17;
+        tmp.fontStyle     = TMPro.FontStyles.Bold;
+        tmp.alignment     = TMPro.TextAlignmentOptions.Center;
+        tmp.color         = Color.white;
+        tmp.raycastTarget = false;
+        // 必须指定含中文字形的字体，否则显示方块
+        var chFont = GetChineseFont();
+        if (chFont != null) tmp.font = chFont;
+
+        // ── 按钮组件 ─────────────────────────────────────────────────
+        var btn = go.AddComponent<Button>();
+        // Hover 颜色反馈
+        var colors          = btn.colors;
+        colors.highlightedColor = new Color(0.25f, 0.25f, 0.25f, 1f);
+        colors.pressedColor     = new Color(0.4f,  0.4f,  0.4f,  1f);
+        btn.colors          = colors;
+        btn.onClick.AddListener(OnReturnToMain);
+
+        returnToMainBtn = btn;
+    }
+
+    void OnReturnToMain()
+    {
+        GameManager.Instance?.ClearClueBadge();
+        SceneTransitionManager.Instance.GoToScene("MainScene");
+    }
+
+    /// <summary>
+    /// 获取支持中文的 TMP 字体。
+    /// 优先使用 ClueCardRenderer 已注入的字体（由 ClueCardConfig 在 Awake 设置），
+    /// 其次读 ClueCardConfig.chineseFont，最后退回 TMP 默认字体。
+    /// </summary>
+    static TMPro.TMP_FontAsset GetChineseFont()
+        => ClueCardRenderer.GetFont()
+        ?? ClueCardConfig.Instance?.chineseFont
+        ?? TMPro.TMP_Settings.defaultFontAsset;
 
     /// <summary>
     /// 若 closeDetailBtn / markToNoteBtn 处于 ScrollRect 或 Mask 的内部，
@@ -172,6 +259,8 @@ public class CluePanelController : MonoBehaviour
             tmp.alignment     = TMPro.TextAlignmentOptions.Center;
             tmp.color         = Color.white;
             tmp.raycastTarget = false;
+            var chFont2 = GetChineseFont();
+            if (chFont2 != null) tmp.font = chFont2;
 
             var btn = go.AddComponent<Button>();
             closeDetailBtn = btn;
@@ -188,7 +277,19 @@ public class CluePanelController : MonoBehaviour
 
     void Start()
     {
+        // ── 此时所有 Awake() 已执行完毕，ClueCardConfig.Instance 和
+        //    ClueCardRenderer._font 已就绪，可以安全使用中文字体 ────────
         EnsureContentRootLayout();
+
+        // 自动创建/修复按钮（必须在 Start 而非 Awake，原因见 Awake 注释）
+        EnsureDetailCloseButtons();
+        FixDetailButtonPositions();
+        EnsureReturnButton();
+
+        // 绑定关闭事件（按钮可能刚在上面创建，所以也必须在 Start）
+        closeDetailBtn?.onClick.AddListener(CloseDetail);
+        backdropBtn?.onClick.AddListener(CloseDetail);
+
         GameManager.Instance?.SyncClueSystemIfExists();
     }
 

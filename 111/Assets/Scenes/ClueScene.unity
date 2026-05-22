@@ -192,7 +192,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: return
+  m_Text: "\u8FD4\u56DE"
 --- !u!222 &44239012
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1050,6 +1050,7 @@ MonoBehaviour:
   backdropBtn: {fileID: 1428257339}
   markToNoteBtn: {fileID: 1233309845}
   cardBuildParent: {fileID: 1140196199}
+  returnToMainBtn: {fileID: 0}
   detailScrollRect: {fileID: 0}
 --- !u!114 &775145419
 MonoBehaviour:

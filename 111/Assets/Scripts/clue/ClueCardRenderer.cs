@@ -19,6 +19,8 @@ public static class ClueCardRenderer
     // ────────────────────────────────────────────────────────────────────
     static TMP_FontAsset _font;
     public static void SetFont(TMP_FontAsset font) => _font = font;
+    /// <summary>返回当前注入的中文字体（由 ClueCardConfig.Awake 注入）</summary>
+    public static TMP_FontAsset GetFont() => _font;
 
     // ────────────────────────────────────────────────────────────────────
     //  颜色常量
