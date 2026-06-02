@@ -59,6 +59,22 @@ public class NewClueNotification : MonoBehaviour
         StartCoroutine(LateInit());
     }
 
+    void OnEnable()
+    {
+        // 订阅跨场景广播，允许没有直接 Instance 引用时也能触发通知
+        EventBus.On("OnRequestNotification", OnRequestNotification);
+    }
+
+    void OnDisable()
+    {
+        EventBus.Off("OnRequestNotification", OnRequestNotification);
+    }
+
+    void OnRequestNotification(object obj)
+    {
+        ShowNotification(obj as string ?? "新线索已添加");
+    }
+
     void OnDestroy()
     {
         // 组件销毁时（场景卸载）立即停止动画协程，防止访问已销毁的 CanvasGroup
@@ -67,6 +83,7 @@ public class NewClueNotification : MonoBehaviour
             StopCoroutine(_activeCoroutine);
             _activeCoroutine = null;
         }
+        EventBus.Off("OnRequestNotification", OnRequestNotification);
     }
 
     IEnumerator LateInit()

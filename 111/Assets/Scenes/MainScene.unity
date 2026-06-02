@@ -2014,6 +2014,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1743754340}
   - component: {fileID: 1743754339}
+  - component: {fileID: 1743754341}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -2037,6 +2038,7 @@ MonoBehaviour:
   NotebookTabs: []
   HasNewClue: 0
   CurrentScene: MainScene
+  ClearedStagesList: 
   chineseFont: {fileID: 11400000, guid: ad801dc4ebff2024e8a43f69bc20824e, type: 2}
 --- !u!4 &1743754340
 Transform:
@@ -2053,6 +2055,34 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1743754341
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1743754338}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ed360ecaa37c414f95366b0e1c49670, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  initialClueIds:
+  - CLU_OVERVIEW
+  - CLU_FENG_ZHONG_CONF
+  - CLU_FENG_XIE_REPORT
+  stage1ClueIds:
+  - CLU_DONG_ZHONG_CONF
+  - CLU_DONG_ZHANG_REPORT
+  stage2ClueIds:
+  - CLU_TANG_ZHONG_CONF
+  - CLU_TANG_CHEN_REPORT
+  stage3ClueIds:
+  - CLU_DONG_GAO_CONF
+  - CLU_FENG_GAO_CONF
+  liuluCharacterId: "\u8001\u516D"
+  liuluClueIds:
+  - CLU_LIULU_CONF
 --- !u!1 &1828228070
 GameObject:
   m_ObjectHideFlags: 0

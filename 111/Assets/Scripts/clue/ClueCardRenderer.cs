@@ -312,7 +312,7 @@ public static class ClueCardRenderer
         {
             var hintRt = MakeRect(root, "SelectHint", W - 40, 20, Color.clear);
             Pos(hintRt, 0, H / 2 - 64 - 26 - 14);   // meta 行下方
-            MakeTMP(hintRt, "📌 拖拽鼠标选中文字，可标记到笔记",
+            MakeTMP(hintRt, "[ 拖拽鼠标选中文字，可标记到笔记 ]",
                 7f, new Color32(120, 130, 160, 180), TextAlignmentOptions.Center, W - 40, 18);
         }
 

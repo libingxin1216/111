@@ -416,6 +416,7 @@
 "Assets/Scripts/Computer Screen/SidebarController.cs"
 "Assets/Scripts/Core/GameManager.cs"
 "Assets/Scripts/Core/SceneTransitionManager.cs"
+"Assets/Scripts/Core/StageProgressionManager.cs"
 "Assets/Scripts/MainScene/ColleagueDeliveryController.cs"
 "Assets/Scripts/MainScene/MainSceneController.cs"
 "Assets/Scripts/Population/PopulationDatabase.cs"

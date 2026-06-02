@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25a467f052a5353488fbc4975aae05a3, type: 3}
   m_Name: Clue Data1
   m_EditorClassIdentifier: 
-  clueId: CLU_001
+  clueId: CLU_FENG_XIE_REPORT
   clueType: 0
   thumbnail: {fileID: 0}
   fullImage: {fileID: 0}
@@ -33,7 +33,7 @@ MonoBehaviour:
     \u4E13\u7528\u6587\u4E66  "
   prerequisiteClueId: 
   characterIdToUnlockPhoto: 
-  clueTitle: "\u5357\u6EAA\u5E02\u516C\u5B89\u5C40\u5211\u4FA6\u652F\u961F \u62A5\u6848\u767B\u8BB0\u7B14\u5F55"
+  clueTitle: "\u5357\u6EAA\u5E02\u51E4\u6816\u8DEF8\xB714\u513F\u7AE5\u62D0\u5356\u6848\u8C22\u660E\u8FDC\u62A5\u6848\u8BB0\u5F55"
   clueDate: "2014\u5E748\u670814\u65E5 "
   clueLocation: 
   clueSubtitle: NX-2014-0814-107

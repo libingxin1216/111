@@ -282,23 +282,30 @@ public class ColleagueDeliveryController : MonoBehaviour
         if (doorAnimator != null) doorAnimator.SetTrigger("DoorClose");
         yield return new WaitForSeconds(0.3f);
 
-        // ── 解锁线索 ──────────────────────────────────────────────────
-        if (!string.IsNullOrEmpty(_pendingClueId))
+        // ── 解锁单条线索（若有配置 nextDeliveryClueId） ───────────────
+        bool hasSingleClue = !string.IsNullOrEmpty(_pendingClueId);
+        if (hasSingleClue)
         {
             ClueSystem.Instance?.UnlockClue(_pendingClueId);
             GameManager.Instance?.AddClue(_pendingClueId);
         }
 
-        // ── 通知条 + 文件夹红点 ───────────────────────────────────────
-        NewClueNotification.Instance?.ShowNotification("新线索已添加");
+        // ── 文件夹红点 ────────────────────────────────────────────────
         if (folderBadge != null) folderBadge.SetActive(true);
 
-        // ── 重置状态，允许下次再触发 ──────────────────────────────────
+        // 重置状态（放在 onComplete 前，确保下次可重新触发）
         _pendingClueId = null;
         _dialogueLines = null;
         _lineIndex     = 0;
 
+        // ── 执行完成回调（onComplete 内含 GiveInitialClues，负责统一通知）─
         _onComplete?.Invoke();
+
+        // 若没有走 StageProgressionManager（如 onComplete 为空或未配置），
+        // 且确实交付了单条线索，则在此补充通知，确保玩家知道有新线索。
+        if (hasSingleClue && (StageProgressionManager.Instance == null
+                              || _onComplete == null))
+            NewClueNotification.Instance?.ShowNotification("新线索已添加");
     }
 
     // ════════════════════════════════════════════════════════════════════

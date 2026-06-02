@@ -62,7 +62,8 @@ public class MainSceneController : MonoBehaviour
     public bool activateDoorOnStart = false;
 
     private bool _isNotebookOpen;
-    private bool _deliveryTriggered;   // 防止重复触发
+    // 注意：_deliveryTriggered 已被 DeliveryAlreadyDone() 取代，
+    // 后者基于 GameManager 持久化数据判断，不受场景重载影响。
 
     // ════════════════════════════════════════════════════════════════════
     void Start()
@@ -79,16 +80,30 @@ public class MainSceneController : MonoBehaviour
         // ── 门的初始状态 ──────────────────────────────────────────────
         if (activateDoorOnStart && !string.IsNullOrEmpty(nextDeliveryClueId))
         {
-            // 情形 A：场景加载时立即启动敲门流程（门缝光效 + 音效 + 等待玩家点击）
-            ActivateDoorKnock();
+            // 情形 A：场景加载时立即启动敲门流程
+            // 但若本次送达的线索已在 GameManager 中（说明已送达过），则不重复触发
+            if (!DeliveryAlreadyDone())
+                ActivateDoorKnock();
+            // 若已送达过，门保持可交互以支持玩家点击（但不会再走同事流程）
+            else if (doorButton != null)
+                doorButton.interactable = true;
         }
         else
         {
             // 情形 B：门保持可交互——玩家点击时才触发流程
-            // ColleagueDeliveryController 存在：首次点击 → OnClickDoor → ActivateDoorKnock
-            // 没有 ColleagueDeliveryController：点击播放门的基础动画（DoorKnock）
             if (doorButton != null) doorButton.interactable = true;
         }
+    }
+
+    /// <summary>
+    /// 判断本次同事送达是否已经完成过（基于 GameManager 持久化数据）。
+    /// 无论场景重载多少次，只要线索已存入 SavedUnlockedClueIds，就认为已送达。
+    /// </summary>
+    bool DeliveryAlreadyDone()
+    {
+        if (string.IsNullOrEmpty(nextDeliveryClueId)) return false;
+        return GameManager.Instance != null
+            && GameManager.Instance.SavedUnlockedClueIds.Contains(nextDeliveryClueId);
     }
 
     // ════════════════════════════════════════════════════════════════════
@@ -115,17 +130,14 @@ public class MainSceneController : MonoBehaviour
         // 以下是"门直接可点击但未配置 ColleagueDelivery"时的 fallback：
         if (colleagueDelivery == null)
         {
-            // 没有挂同事控制器：直接播放门的动画（如有）
             if (doorAnimator != null) doorAnimator.SetTrigger("DoorKnock");
             return;
         }
 
-        // 有 ColleagueDelivery 但还没触发过流程：首次点击门就启动
-        if (!_deliveryTriggered)
-        {
-            _deliveryTriggered = true;
+        // 有 ColleagueDelivery 且尚未完成送达：触发流程
+        // DeliveryAlreadyDone() 基于 GameManager 持久化判断，不受场景重载影响
+        if (!DeliveryAlreadyDone())
             ActivateDoorKnock();
-        }
     }
 
     void OnClickNotebook()
@@ -153,14 +165,21 @@ public class MainSceneController : MonoBehaviour
         if (colleagueDelivery != null)
         {
             // ── 完整流程（含音效、动画、台词） ──────────────────────
+            // onComplete 在同事动画全部结束后才触发：
+            //   1. RefreshFolderBadge()         ← 刷新桌面文件夹红点
+            //   2. GiveInitialClues()           ← 此时才发放初始线索 + 显示通知
             colleagueDelivery.TriggerDelivery(
                 finalClueId,
                 finalLines,
-                onComplete: RefreshFolderBadge);
+                onComplete: () =>
+                {
+                    RefreshFolderBadge();
+                    StageProgressionManager.Instance?.GiveInitialClues();
+                });
         }
         else
         {
-            // ── Fallback：简化版（原有行为） ──────────────────────────
+            // ── Fallback：无同事动画，直接解锁后发放初始线索 ─────────
             if (doorButton != null) doorButton.interactable = true;
             if (doorAnimator != null) doorAnimator.SetTrigger("DoorGlow");
 
@@ -168,9 +187,10 @@ public class MainSceneController : MonoBehaviour
             {
                 ClueSystem.Instance?.UnlockClue(finalClueId);
                 GameManager.Instance?.AddClue(finalClueId);
-                NewClueNotification.Instance?.ShowNotification("新线索已添加");
                 RefreshFolderBadge();
             }
+            // Fallback 下也在"门触发"这一步发放初始线索
+            StageProgressionManager.Instance?.GiveInitialClues();
         }
     }
 

@@ -46,6 +46,9 @@ public class CluePanelController : MonoBehaviour
     private string    _currentSelection = "";   // 当前选中的文字
     private bool      _listenersRegistered;
     private GameObject _builtCard;              // 当前构建的卡片 GO
+    // CanvasGroup 用于显隐"标记到笔记"按钮，避免 SetActive 在 Canvas Rebuild 期间
+    // 触发 Image.OnEnable → "Trying to add Graphic for rebuild" 报错
+    private CanvasGroup _markBtnGroup;
 
     // ════════════════════════════════════════════════════════════════════
     //  Unity 生命周期
@@ -56,10 +59,21 @@ public class CluePanelController : MonoBehaviour
         Instance = this;
         detailOverlay.SetActive(false);
 
-        // markToNoteBtn 不涉及字体，可在 Awake 安全配置
+        // markToNoteBtn：用 CanvasGroup 代替 SetActive 控制显隐，
+        // 避免在 Canvas Rebuild 期间触发 Image.OnEnable 报错
         if (markToNoteBtn != null)
         {
-            markToNoteBtn.gameObject.SetActive(false);
+            // detailOverlay.SetActive(false) 已在上方执行，此时父节点为 inactive，
+            // 所以 AddComponent<CanvasGroup> 不会触发 Image.OnEnable → 不产生 rebuild 报错
+            //
+            // ⚠️ 不能用 C# ?? 运算符：Unity 的 GetComponent 返回"伪 null"对象，
+            //    ?? 无法识别，会导致 AddComponent 永远不被调用，
+            //    后续访问该引用时抛出 MissingComponentException
+            _markBtnGroup = markToNoteBtn.GetComponent<CanvasGroup>();
+            if (_markBtnGroup == null)   // Unity == null 可正确识别伪 null
+                _markBtnGroup = markToNoteBtn.gameObject.AddComponent<CanvasGroup>();
+
+            SetMarkBtnVisible(false);   // 通过 alpha=0 隐藏，不调用 SetActive
             markToNoteBtn.onClick.AddListener(MarkSelectedTextToNote);
         }
 
@@ -69,6 +83,32 @@ public class CluePanelController : MonoBehaviour
         //       导致字体为 null → 中文方块。
         // Unity 保证：所有脚本的 Awake() 全部结束后才进入 Start()，
         //       因此在 Start() 中调用可 100% 拿到正确字体。
+    }
+
+    /// <summary>
+    /// 通过 CanvasGroup 控制"标记到笔记"按钮的显隐。
+    /// 不使用 SetActive：TMP 的 SendOnTextSelection 在 Canvas Rebuild 期间触发，
+    /// 若此时调用 SetActive 会引发 Image.OnEnable 的 rebuild 冲突报错。
+    /// CanvasGroup.alpha 修改不会触发 OnEnable/OnDisable，完全绕开该问题。
+    /// </summary>
+    void SetMarkBtnVisible(bool visible)
+    {
+        if (markToNoteBtn == null) return;
+
+        // 懒加载：确保 CanvasGroup 一定存在（Awake 已初始化，这里是双重保险）
+        // ⚠️ 必须用显式 if 判断，不能用 ??（Unity 伪 null 会被 ?? 误认为有效引用）
+        if (_markBtnGroup == null)
+        {
+            _markBtnGroup = markToNoteBtn.GetComponent<CanvasGroup>();
+            if (_markBtnGroup == null)
+                _markBtnGroup = markToNoteBtn.gameObject.AddComponent<CanvasGroup>();
+        }
+
+        // 仅修改 alpha/interactable，绝不调用 SetActive
+        // SetActive 会触发 Image.OnEnable，在 Canvas Rebuild 中调用会报错
+        _markBtnGroup.alpha          = visible ? 1f : 0f;
+        _markBtnGroup.interactable   = visible;
+        _markBtnGroup.blocksRaycasts = visible;
     }
 
     // ════════════════════════════════════════════════════════════════════
@@ -116,7 +156,7 @@ public class CluePanelController : MonoBehaviour
         labelRt.anchorMax = Vector2.one;
         labelRt.sizeDelta = Vector2.zero;
         var tmp           = labelGo.AddComponent<TMPro.TextMeshProUGUI>();
-        tmp.text          = "←  主界面";
+        tmp.text          = "< 主界面";
         tmp.fontSize      = 17;
         tmp.fontStyle     = TMPro.FontStyles.Bold;
         tmp.alignment     = TMPro.TextAlignmentOptions.Center;
@@ -178,6 +218,8 @@ public class CluePanelController : MonoBehaviour
                 new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0.5f, 0),
                 new Vector2(200, 48), new Vector2(0, 24));
             markToNoteBtn.transform.SetAsLastSibling();
+            // CanvasGroup 已在 Awake 初始化，此处只需确保隐藏状态正确
+            SetMarkBtnVisible(false);
         }
     }
 
@@ -250,7 +292,7 @@ public class CluePanelController : MonoBehaviour
             labelRt.anchorMax = Vector2.one;
             labelRt.sizeDelta = Vector2.zero;
             var tmp = labelGo.AddComponent<TMPro.TextMeshProUGUI>();
-            tmp.text          = "✕";
+            tmp.text          = "X";
             tmp.fontSize      = 24;
             tmp.alignment     = TMPro.TextAlignmentOptions.Center;
             tmp.color         = Color.white;
@@ -279,10 +321,22 @@ public class CluePanelController : MonoBehaviour
 
         // 自动创建/修复按钮（必须在 Start 而非 Awake，原因见 Awake 注释）
         EnsureDetailCloseButtons();
+
+        // FixDetailButtonPositions / EnsureReturnButton 涉及将 UI 元素 SetParent 到新节点。
+        // 若在 Canvas 初始 Graphic Rebuild 期间执行会触发
+        // "Trying to add Graphic for rebuild while already in a graphic rebuild loop" 警告。
+        // 推迟到帧末（WaitForEndOfFrame）后执行，确保初始 Rebuild 已完成。
+        StartCoroutine(DeferredButtonSetup());
+    }
+
+    System.Collections.IEnumerator DeferredButtonSetup()
+    {
+        yield return new WaitForEndOfFrame();
+
         FixDetailButtonPositions();
         EnsureReturnButton();
 
-        // 绑定关闭事件（按钮可能刚在上面创建，所以也必须在 Start）
+        // 绑定关闭事件（按钮在上面的方法中可能刚刚被创建或移动）
         closeDetailBtn?.onClick.AddListener(CloseDetail);
         backdropBtn?.onClick.AddListener(CloseDetail);
 
@@ -421,7 +475,7 @@ public class CluePanelController : MonoBehaviour
     {
         _currentClue      = clue;
         _currentSelection = "";
-        if (markToNoteBtn != null) markToNoteBtn.gameObject.SetActive(false);
+        SetMarkBtnVisible(false);
 
         // ── 清除上一张卡片 ──────────────────────────────────────────
         if (_builtCard != null) { Destroy(_builtCard); _builtCard = null; }
@@ -457,7 +511,7 @@ public class CluePanelController : MonoBehaviour
                 detailImage.sprite = clue.fullImage;
 
             // Fallback 模式下"标记到笔记"标记整条
-            if (markToNoteBtn != null) markToNoteBtn.gameObject.SetActive(true);
+            SetMarkBtnVisible(true);
         }
 
         // ── 自动解锁人物照片 ──────────────────────────────────────────
@@ -473,7 +527,7 @@ public class CluePanelController : MonoBehaviour
     {
         detailOverlay.SetActive(false);
         _currentSelection = "";
-        if (markToNoteBtn != null) markToNoteBtn.gameObject.SetActive(false);
+        SetMarkBtnVisible(false);
     }
 
     // ════════════════════════════════════════════════════════════════════
@@ -484,8 +538,8 @@ public class CluePanelController : MonoBehaviour
     {
         _currentSelection = selectedText;
         bool hasSelection = !string.IsNullOrWhiteSpace(selectedText);
-        if (markToNoteBtn != null)
-            markToNoteBtn.gameObject.SetActive(hasSelection);
+        // 用 CanvasGroup 而非 SetActive，避免在 TMP Rebuild 期间触发 Image.OnEnable 报错
+        SetMarkBtnVisible(hasSelection);
     }
 
     // ════════════════════════════════════════════════════════════════════

@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44263dc4d63156f4981a9ab4eef9971f, type: 3}
   m_Name: DemoStageConfig
   m_EditorClassIdentifier: 
-  stageThresholds: 03000000040000000500000006000000
+  stageThresholds: 030000000400000005000000

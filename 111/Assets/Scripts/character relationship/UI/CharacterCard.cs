@@ -5,7 +5,7 @@ using TMPro;
 
 public class CharacterCard : MonoBehaviour
 {
-    [Header("��Ҫ�����������Ҫ�����Ӧ�ֶ����գ�")]
+    [Header("需要在Prefab上分配（需要填写对应字段不为空）")]
     public Image photoImage;
     public GameObject photoBorderGray;
     public Button nameButton;
@@ -15,64 +15,109 @@ public class CharacterCard : MonoBehaviour
     public Transform badgeGroup;
     public GameObject badgePrefab;
 
-    [Header("��Ƭ���")]
+    [Header("卡片边框")]
     public Image cardBorder;
     public GameObject lockIcon;
 
-    [Header("�� CardManager ��ֵ")]
+    [Header("由 CardManager 赋值")]
     public CharacterData data;
 
     static readonly Color normalBorderColor = new Color(0.85f, 0.85f, 0.85f);
     static readonly Color lockedBorderColor = new Color(1f, 0.84f, 0f);
 
-    // ── 运行时解锁的照片（不修改 ScriptableObject，跨场景由 GameManager 恢复）
+    // 运行时照片（不修改 ScriptableObject，跨场景由 GameManager 恢复）
     private Sprite _runtimePhoto;
+
+    // ════════════════════════════════════════════════════════════════════
+    //  Unity 生命周期
+    // ════════════════════════════════════════════════════════════════════
 
     void Start()
     {
-        // 若 currentName 仍为空，但 ScriptableObject 里已配置了 prefilledName，
-        // 自动填入（避免需要手动调用 ResetRuntimeData）
+        // 1. 优先从 GameManager 恢复跨场景持久化的状态（覆盖 ScriptableObject 默认值）
+        RestoreFromGameManager();
+
+        // 2. 若 currentName 仍为空，用 prefilledName 填入
         if (data != null
             && string.IsNullOrEmpty(data.currentName)
             && !string.IsNullOrEmpty(data.prefilledName))
         {
             data.currentName = data.prefilledName;
+            SaveToGameManager();
         }
 
-        // 场景每次加载时，从 GameManager 恢复跨场景解锁的照片
+        // 3. 恢复照片
         TryLoadPhotoFromGameManager();
-        // 把中文字体应用到所有 TMP 组件（防止方块字）
+
+        // 4. 字体 + 显示
         ApplyChineseFont();
         RefreshDisplay();
+
+        // 5. 事件绑定
         nameButton?.onClick.AddListener(OnClickNameField);
         roleButton?.onClick.AddListener(OnClickRoleField);
-        EventBus.On("OnPhotoUnlocked", OnPhotoUnlocked);
-        EventBus.On("OnCharacterLocked", OnCharacterLocked);
+        EventBus.On("OnPhotoUnlocked",    OnPhotoUnlocked);
+        EventBus.On("OnCharacterLocked",  OnCharacterLocked);
     }
 
-    /// <summary>
-    /// 从 GameManager 获取中文字体，应用到卡片上的所有 TMP 文字组件。
-    /// 调用时机：Start()（初始化）+ RefreshDisplay()（徽章动态创建后）。
-    /// </summary>
-    void ApplyChineseFont()
+    void OnDestroy()
     {
-        var font = GameManager.GetChineseFont();
-        if (font == null) return;
+        EventBus.Off("OnPhotoUnlocked",   OnPhotoUnlocked);
+        EventBus.Off("OnCharacterLocked", OnCharacterLocked);
+    }
 
-        if (nameText != null) nameText.font = font;
-        if (roleText != null) roleText.font = font;
+    // ════════════════════════════════════════════════════════════════════
+    //  跨场景持久化：存 / 取
+    // ════════════════════════════════════════════════════════════════════
 
-        // 徽章组内的所有 TMP（动态生成，RefreshDisplay 之后调用）
-        if (badgeGroup != null)
-            foreach (var tmp in badgeGroup.GetComponentsInChildren<TextMeshProUGUI>(true))
-                tmp.font = font;
+    /// <summary>
+    /// 从 GameManager.CharacterProgressMap 读取并恢复人物卡片状态。
+    /// 在 Start() 最开始调用，保证切换场景后数据不丢失。
+    /// </summary>
+    void RestoreFromGameManager()
+    {
+        if (GameManager.Instance == null || data == null) return;
+        if (!GameManager.Instance.CharacterProgressMap
+                .TryGetValue(data.characterId, out var progress)) return;
+
+        // 恢复姓名
+        if (!string.IsNullOrEmpty(progress.FilledName))
+            data.currentName = progress.FilledName;
+
+        // 恢复身份/角色
+        if (!string.IsNullOrEmpty(progress.FilledIdentity))
+            data.currentRole = progress.FilledIdentity;
+
+        // 恢复锁定状态
+        if (progress.IsLocked && !data.isLocked)
+        {
+            data.isLocked = true;
+            // 直接应用锁定外观（无需协程动画，直接到达最终状态）
+            if (cardBorder != null) cardBorder.color = lockedBorderColor;
+            if (lockIcon   != null) lockIcon.SetActive(true);
+            if (nameButton != null) nameButton.interactable = false;
+            if (roleButton != null) roleButton.interactable = false;
+        }
     }
 
     /// <summary>
-    /// 从 GameManager.UnlockedPhotos 读取照片并存入运行时变量。
-    /// 跨场景时 GameManager 持久，CharacterCard 每次 Start 时调用此方法，
-    /// 确保即使事件在其他场景发出也不会丢失。
+    /// 将当前状态写入 GameManager.CharacterProgressMap（DontDestroyOnLoad）。
+    /// 在每次状态变化时调用，确保数据即时持久化。
     /// </summary>
+    void SaveToGameManager()
+    {
+        if (GameManager.Instance == null || data == null) return;
+        GameManager.Instance.SaveCharacterProgress(
+            data.characterId,
+            data.currentName,
+            data.currentRole,
+            data.isLocked);
+    }
+
+    // ════════════════════════════════════════════════════════════════════
+    //  照片
+    // ════════════════════════════════════════════════════════════════════
+
     void TryLoadPhotoFromGameManager()
     {
         if (data == null || GameManager.Instance == null) return;
@@ -80,23 +125,33 @@ public class CharacterCard : MonoBehaviour
             && photo != null)
         {
             _runtimePhoto      = photo;
-            data.photoUnlocked = true;   // 标记已解锁，供 RefreshDisplay 判断
+            data.photoUnlocked = true;
         }
     }
 
-    void OnDestroy()
+    // ════════════════════════════════════════════════════════════════════
+    //  字体
+    // ════════════════════════════════════════════════════════════════════
+
+    void ApplyChineseFont()
     {
-        EventBus.Off("OnPhotoUnlocked", OnPhotoUnlocked);
-        EventBus.Off("OnCharacterLocked", OnCharacterLocked);
+        var font = GameManager.GetChineseFont();
+        if (font == null) return;
+        if (nameText != null) nameText.font = font;
+        if (roleText != null) roleText.font = font;
+        if (badgeGroup != null)
+            foreach (var tmp in badgeGroup.GetComponentsInChildren<TextMeshProUGUI>(true))
+                tmp.font = font;
     }
+
+    // ════════════════════════════════════════════════════════════════════
+    //  显示刷新
+    // ════════════════════════════════════════════════════════════════════
 
     public void RefreshDisplay()
     {
         if (nameText != null)
         {
-            // 优先显示 currentName（玩家已填写），
-            // 其次 prefilledName（ScriptableObject 预设），
-            // 均为空则显示 "???"（提示玩家待调查）
             string displayName = !string.IsNullOrEmpty(data.currentName)
                                ? data.currentName
                                : (!string.IsNullOrEmpty(data.prefilledName)
@@ -107,7 +162,6 @@ public class CharacterCard : MonoBehaviour
 
         if (roleText != null)
         {
-            // 角色同理：已填写则显示，否则显示 "???"
             roleText.text = string.IsNullOrEmpty(data.currentRole)
                           ? "???"
                           : data.currentRole;
@@ -115,11 +169,8 @@ public class CharacterCard : MonoBehaviour
 
         if (photoImage != null)
         {
-            // 优先使用运行时动态解锁的照片（来自点击人脸热区），
-            // 其次使用 ScriptableObject 中预先配置的照片
-            var displayPhoto = _runtimePhoto != null ? _runtimePhoto : data.photo;
-            bool hasPhoto    = data.photoUnlocked && displayPhoto != null;
-
+            var  displayPhoto = _runtimePhoto != null ? _runtimePhoto : data.photo;
+            bool hasPhoto     = data.photoUnlocked && displayPhoto != null;
             photoImage.gameObject.SetActive(hasPhoto);
             if (photoBorderGray != null) photoBorderGray.SetActive(!hasPhoto);
             if (hasPhoto) photoImage.sprite = displayPhoto;
@@ -128,9 +179,7 @@ public class CharacterCard : MonoBehaviour
         // Badge 动态创建
         if (badgeGroup != null && badgePrefab != null)
         {
-            foreach (Transform child in badgeGroup)
-                Destroy(child.gameObject);
-
+            foreach (Transform child in badgeGroup) Destroy(child.gameObject);
             var font = GameManager.GetChineseFont();
             foreach (var label in data.badgeLabels)
             {
@@ -139,19 +188,27 @@ public class CharacterCard : MonoBehaviour
                 if (tmp != null)
                 {
                     tmp.text = label;
-                    if (font != null) tmp.font = font;  // 应用中文字体
+                    if (font != null) tmp.font = font;
                 }
             }
         }
     }
 
-    // ��д��ֻ������ʾ���������Զ��ж�
+    // ════════════════════════════════════════════════════════════════════
+    //  玩家交互：填写姓名 / 角色
+    // ════════════════════════════════════════════════════════════════════
+
     void OnClickNameField()
     {
         if (data.isLocked) return;
         SelectionPanel.Instance.Show(
             data.nameOptions,
-            (selected) => { data.currentName = selected; RefreshDisplay(); },
+            (selected) =>
+            {
+                data.currentName = selected;
+                SaveToGameManager();   // ← 立即持久化
+                RefreshDisplay();
+            },
             nameButton.GetComponent<RectTransform>());
     }
 
@@ -160,14 +217,22 @@ public class CharacterCard : MonoBehaviour
         if (data.isLocked) return;
         SelectionPanel.Instance.Show(
             data.roleOptions,
-            (selected) => { data.currentRole = selected; RefreshDisplay(); },
+            (selected) =>
+            {
+                data.currentRole = selected;
+                SaveToGameManager();   // ← 立即持久化
+                RefreshDisplay();
+            },
             roleButton.GetComponent<RectTransform>());
     }
+
+    // ════════════════════════════════════════════════════════════════════
+    //  事件处理
+    // ════════════════════════════════════════════════════════════════════
 
     void OnPhotoUnlocked(object obj)
     {
         if ((string)obj != data.characterId) return;
-        // 同时从 GameManager 取回实际的 Sprite，不依赖 ScriptableObject 预设
         TryLoadPhotoFromGameManager();
         RefreshDisplay();
     }
@@ -185,12 +250,15 @@ public class CharacterCard : MonoBehaviour
         while (t < duration)
         {
             t += Time.deltaTime;
-            cardBorder.color = Color.Lerp(
-                normalBorderColor, lockedBorderColor, t / duration);
+            if (cardBorder != null)
+                cardBorder.color = Color.Lerp(normalBorderColor, lockedBorderColor, t / duration);
             yield return null;
         }
-        cardBorder.color = lockedBorderColor;
-        if (nameButton != null) nameButton.interactable = false;
-        if (roleButton != null) roleButton.interactable = false;
+        if (cardBorder != null) cardBorder.color = lockedBorderColor;
+        if (nameButton  != null) nameButton.interactable = false;
+        if (roleButton  != null) roleButton.interactable = false;
+
+        // 锁定完成后持久化（isLocked 由 LockSystem 设置，这里同步到 GameManager）
+        SaveToGameManager();
     }
 }

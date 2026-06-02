@@ -22,6 +22,20 @@ public class GameManager : MonoBehaviour
     [Header("人物照片解锁")]
     public Dictionary<string, Sprite> UnlockedPhotos = new Dictionary<string, Sprite>();
 
+    [Header("剧情阶段进度（由 StageProgressionManager 维护）")]
+    [Tooltip("已触发过的阶段编号列表（防止重复解锁）。普通阶段 1/2/3，刘陆特殊阶段 99。")]
+    public List<int> ClearedStagesList = new List<int>();
+
+    /// <summary>判断阶段是否已触发过</summary>
+    public bool HasClearedStage(int stage) => ClearedStagesList.Contains(stage);
+
+    /// <summary>标记阶段已触发</summary>
+    public void MarkStageCleared(int stage)
+    {
+        if (!ClearedStagesList.Contains(stage))
+            ClearedStagesList.Add(stage);
+    }
+
     [Header("全局中文字体（拖入 SIMHEI.asset，所有场景共用）")]
     [Tooltip("拖入 Assets/Font/SIMHEI.asset（或其他含中文字形的 TMP SDF 字体）。\n" +
              "GameManager 是 DontDestroyOnLoad，所有场景均可从此处获取字体。")]
@@ -54,13 +68,13 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
             return;
-
-            // 初始化默认标签
-            if (NotebookTabs.Count == 0)
-                NotebookTabs.Add(new NotebookTabData("默认笔记"));
         }
         Instance = this;
         DontDestroyOnLoad(gameObject);
+
+        // 初始化默认笔记本标签
+        if (NotebookTabs.Count == 0)
+            NotebookTabs.Add(new NotebookTabData("默认笔记"));
 
         // 监听场景加载完成事件
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -73,9 +87,16 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        // 开局解锁初始线索，存入GameManager
-        AddClueToSave("CLU_001");
-        AddClueToSave("CLU_002");
+        // 若 StageProgressionManager 存在，由它负责初始线索发放，
+        // 此处只做兜底（保证老 CLU_001/CLU_002 等已有 ScriptableObject 仍可工作）
+        if (StageProgressionManager.Instance == null)
+        {
+            AddClueToSave("CLU_001");
+            AddClueToSave("CLU_002");
+        }
+        // 初始化默认笔记本标签
+        if (NotebookTabs.Count == 0)
+            NotebookTabs.Add(new NotebookTabData("默认笔记"));
 
         // 通知当前场景的ClueSystem同步数据
         SyncClueSystemIfExists();
@@ -133,14 +154,41 @@ public class GameManager : MonoBehaviour
         HasNewClue = false;
         NavigationBar.Instance?.UpdateClueBadge(false);
     }
+
+    // ════════════════════════════════════════════════════════════════════
+    //  人物进度：存取（供 CharacterCard 使用）
+    // ════════════════════════════════════════════════════════════════════
+
+    /// <summary>
+    /// 获取指定人物的进度记录；若不存在则自动创建空记录。
+    /// </summary>
+    public CharacterProgress GetOrCreateCharacterProgress(string characterId)
+    {
+        if (!CharacterProgressMap.ContainsKey(characterId))
+            CharacterProgressMap[characterId] = new CharacterProgress
+                { CharacterId = characterId };
+        return CharacterProgressMap[characterId];
+    }
+
+    /// <summary>
+    /// 将人物当前状态快照写入 CharacterProgressMap（场景切换后可恢复）。
+    /// </summary>
+    public void SaveCharacterProgress(string characterId,
+        string currentName, string currentRole, bool isLocked)
+    {
+        var p           = GetOrCreateCharacterProgress(characterId);
+        p.FilledName    = currentName  ?? "";
+        p.FilledIdentity = currentRole ?? "";
+        p.IsLocked      = isLocked;
+    }
 }
 
 [System.Serializable]
 public class CharacterProgress
 {
     public string CharacterId;
-    public string FilledName = "";
+    public string FilledName     = "";
     public string FilledIdentity = "";
-    public string FilledPhotoId = "";
-    public bool IsLocked = false;
+    public string FilledPhotoId  = "";  // 保留旧字段，向后兼容
+    public bool   IsLocked       = false;
 }
