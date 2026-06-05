@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8be558ccfe06a3946be63fc0ec87b69c, type: 3}
   m_Name: "CharacterData14\u8001\u516D"
   m_EditorClassIdentifier: 
-  characterId: "\u8001\u516D"
+  characterId: "\u5218\u9646"
   characterType: 0
-  correctName: "\u8001\u516D"
+  correctName: "\u5218\u9646"
   correctRole: "\u72AF\u7F6A\u5ACC\u7591\u4EBA"
-  photo: {fileID: 0}
+  photo: {fileID: 21300000, guid: 219fd7f8557f2d44aa970601636b80ca, type: 3}
   nameOptions:
   - "\u9648\u5609\u4E50"
   - "\u9648\u5EFA\u519B"
@@ -31,7 +31,7 @@ MonoBehaviour:
   - "\u6797\u5A49\u6E05"
   - "\u949F\u5FB7\u53D1"
   - "\u9AD8\u4E9A\u73CD"
-  - "\u8001\u516D"
+  - "\u5218\u9646"
   - "\u6885\u4EC1\u4E49"
   roleOptions:
   - "\u5C0F\u5B66\u751F"
@@ -42,6 +42,7 @@ MonoBehaviour:
   - "\u5C0F\u5B66\u6559\u5E08"
   - "\u72AF\u7F6A\u5ACC\u7591\u4EBA"
   badgeLabels: []
+  prefilledName: 
   currentName: 
   currentRole: 
   photoUnlocked: 0

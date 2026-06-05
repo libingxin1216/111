@@ -16,7 +16,7 @@ MonoBehaviour:
   characterType: 0
   correctName: "\u5218\u6842\u82F1"
   correctRole: "\u5DE5\u4EBA"
-  photo: {fileID: 0}
+  photo: {fileID: 21300000, guid: 78f192b5b97859947a88232823f92d82, type: 3}
   nameOptions:
   - "\u9648\u5609\u4E50"
   - "\u9648\u5EFA\u519B"
@@ -42,6 +42,7 @@ MonoBehaviour:
   - "\u5C0F\u5B66\u6559\u5E08"
   - "\u72AF\u7F6A\u5ACC\u7591\u4EBA"
   badgeLabels: []
+  prefilledName: 
   currentName: 
   currentRole: 
   photoUnlocked: 0

@@ -16,7 +16,7 @@ MonoBehaviour:
   characterType: 0
   correctName: "\u674E\u96E8\u6B23"
   correctRole: "\u5C0F\u5B66\u751F"
-  photo: {fileID: 0}
+  photo: {fileID: 21300000, guid: f9bf0f763b6d23f48854c4a844a1d80b, type: 3}
   nameOptions:
   - "\u9648\u5609\u4E50"
   - "\u9648\u5EFA\u519B"
