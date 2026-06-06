@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: "CharacterData4\u9648\u5B88\u5C71"
   m_EditorClassIdentifier: 
   characterId: "\u9648\u5B88\u5C71"
-  characterType: 0
+  characterType: 1
   correctName: "\u9648\u5B88\u5C71"
   correctRole: "\u519C\u6C11"
   photo: {fileID: 21300000, guid: 4d15a4b2945991d4fbc3e3a9692cc18f, type: 3}
@@ -45,5 +45,5 @@ MonoBehaviour:
   prefilledName: 
   currentName: 
   currentRole: 
-  photoUnlocked: 0
+  photoUnlocked: 1
   isLocked: 0

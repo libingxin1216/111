@@ -3,23 +3,23 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "CharacterData", menuName = "Game/CharacterData")]
 public class CharacterData : ScriptableObject
 {
-    [Header("»ù´¡ĞÅÏ¢")]
+    [Header("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢")]
     public string characterId;
     public CharacterType characterType;
 
-    [Header("ÕıÈ·´ğ°¸")]
+    [Header("ï¿½ï¿½È·ï¿½ï¿½")]
     public string correctName;
     public string correctRole;
     public Sprite photo;
 
-    [Header("Ñ¡ÔñÃæ°åÑ¡Ïî")]
+    [Header("Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½")]
     public string[] nameOptions;
     public string[] roleOptions;
 
-    [Header("¶îÍâ±êÇ©£¨ÈçÈË··×Ó¡¢ÔÚÌÓ£©")]
+    [Header("ï¿½ï¿½ï¿½ï¿½ï¿½Ç©ï¿½ï¿½ï¿½ï¿½ï¿½Ë·ï¿½ï¿½Ó¡ï¿½ï¿½ï¿½ï¿½Ó£ï¿½")]
     public string[] badgeLabels;
 
-    [Header("Ô¤ÌîĞÅÏ¢£¨ÓÎÏ·¿ªÊ¼Ê±Ö±½ÓÏÔÊ¾£¬Áô¿ÕÔò²»Ô¤Ìî£©")]
+    [Header("Ô¤ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½Ï·ï¿½ï¿½Ê¼Ê±Ö±ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô¤ï¿½î£©")]
     public string prefilledName;
 
     [HideInInspector] public string currentName = "";
