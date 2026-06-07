@@ -22,17 +22,24 @@ public class ClueSystem : MonoBehaviour
     {
         Instance = this;
 
-        // 保底：若 Inspector 里没有拖入 ClueData，尝试从已加载资源中自动获取
-        if (allClues == null || allClues.Length == 0)
-        {
-            allClues = Resources.FindObjectsOfTypeAll<ClueData>();
-            if (allClues.Length > 0)
-                Debug.Log($"[ClueSystem] allClues 未设置，自动加载了 {allClues.Length} 条 ClueData。" +
-                          "建议在 Inspector 中手动将 ScriptableObject 拖入 allClues 数组。");
-            else
-                Debug.LogWarning("[ClueSystem] allClues 为空且内存中找不到任何 ClueData！" +
-                                 "请在 ClueSystem 组件的 Inspector 中将所有 ClueData 资产拖入 allClues 数组。");
-        }
+        // 将 Inspector 手动配置的条目与内存中所有已加载的 ClueData 合并，
+        // 确保新增资产即使未拖入 Inspector 也能被发现。
+        var inMemory = Resources.FindObjectsOfTypeAll<ClueData>();
+        var merged = new System.Collections.Generic.HashSet<ClueData>();
+        if (allClues != null)
+            foreach (var c in allClues)
+                if (c != null) merged.Add(c);
+        if (inMemory != null)
+            foreach (var c in inMemory)
+                if (c != null && !string.IsNullOrEmpty(c.clueId)) merged.Add(c);
+
+        allClues = new ClueData[merged.Count];
+        merged.CopyTo(allClues);
+
+        if (allClues.Length == 0)
+            Debug.LogWarning("[ClueSystem] allClues 为空且内存中找不到任何 ClueData！");
+        else
+            Debug.Log($"[ClueSystem] allClues 初始化完成，共 {allClues.Length} 条。");
     }
 
     // ════════════════════════════════════════════════════════════════════

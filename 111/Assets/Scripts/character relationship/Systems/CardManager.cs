@@ -97,7 +97,7 @@ public class CardManager : MonoBehaviour
 
             LockSystem.Instance.RegisterCharacter(slot.character);
             lineManager.RegisterCard(
-                slotNames[i],
+                slot.character.characterId,
                 go.GetComponent<RectTransform>());
         }
 

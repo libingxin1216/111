@@ -84,6 +84,7 @@ public class LockSystem : MonoBehaviour
 
             bool aligned = IsAligned(data);
             Debug.Log($"[LockSystem] 检查 {data.characterId}：" +
+                      $"photo={data.photoUnlocked} " +
                       $"name='{data.currentName}'(正确:'{data.correctName}') " +
                       $"role='{data.currentRole}'(正确:'{data.correctRole}') " +
                       $"type={data.characterType} → {(aligned ? "✓ 对齐" : "✗ 未对齐")}");
@@ -102,7 +103,7 @@ public class LockSystem : MonoBehaviour
             Debug.Log("[LockSystem] 本次提交没有新增锁定的角色（填写内容与正确答案不符）。");
     }
 
-    // 判断人物信息是否对齐（名字 + 角色匹配即视为对齐，照片解锁为独立功能）
+    // 判断人物信息是否对齐
     private bool IsAligned(CharacterData data)
     {
         // correctName 为空说明 ScriptableObject 尚未配置答案，跳过
@@ -110,15 +111,14 @@ public class LockSystem : MonoBehaviour
 
         if (data.characterType == CharacterType.Main)
         {
-            // Main 角色：姓名 + 角色身份都必须正确
-            // 注意：移除了 photoUnlocked 要求，照片解锁属于独立线索机制，
-            //       不应阻塞人物关系的核心对齐判定
-            return data.currentName == data.correctName
+            // 主要人物：照片已解锁 + 姓名正确 + 角色身份正确，三项全部满足才对齐
+            return data.photoUnlocked
+                && data.currentName == data.correctName
                 && data.currentRole == data.correctRole;
         }
         else
         {
-            // Minor 角色：只需姓名正确
+            // 次要人物：只需姓名正确
             return data.currentName == data.correctName;
         }
     }

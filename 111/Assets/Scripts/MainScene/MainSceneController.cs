@@ -78,32 +78,29 @@ public class MainSceneController : MonoBehaviour
         RefreshFolderBadge();
 
         // ── 门的初始状态 ──────────────────────────────────────────────
-        if (activateDoorOnStart && !string.IsNullOrEmpty(nextDeliveryClueId))
+        // 场景加载时自动播放敲门音效，完成后门变为可点击（一次点击即开始对话）
+        if (activateDoorOnStart && colleagueDelivery != null && !DeliveryAlreadyDone())
         {
-            // 情形 A：场景加载时立即启动敲门流程
-            // 但若本次送达的线索已在 GameManager 中（说明已送达过），则不重复触发
-            if (!DeliveryAlreadyDone())
-                ActivateDoorKnock();
-            // 若已送达过，门保持可交互以支持玩家点击（但不会再走同事流程）
-            else if (doorButton != null)
-                doorButton.interactable = true;
+            ActivateDoorKnock();
         }
         else
         {
-            // 情形 B：门保持可交互——玩家点击时才触发流程
             if (doorButton != null) doorButton.interactable = true;
         }
     }
 
     /// <summary>
     /// 判断本次同事送达是否已经完成过（基于 GameManager 持久化数据）。
-    /// 无论场景重载多少次，只要线索已存入 SavedUnlockedClueIds，就认为已送达。
+    /// 无论场景重载多少次，只要初始阶段已完成，就认为已送达。
     /// </summary>
     bool DeliveryAlreadyDone()
     {
-        if (string.IsNullOrEmpty(nextDeliveryClueId)) return false;
-        return GameManager.Instance != null
-            && GameManager.Instance.SavedUnlockedClueIds.Contains(nextDeliveryClueId);
+        if (GameManager.Instance == null) return false;
+        // 若配置了具体线索 ID，以该线索是否已解锁为准
+        if (!string.IsNullOrEmpty(nextDeliveryClueId))
+            return GameManager.Instance.SavedUnlockedClueIds.Contains(nextDeliveryClueId);
+        // 否则以初始阶段（stage 0）是否已清除为准
+        return GameManager.Instance.HasClearedStage(0);
     }
 
     // ════════════════════════════════════════════════════════════════════

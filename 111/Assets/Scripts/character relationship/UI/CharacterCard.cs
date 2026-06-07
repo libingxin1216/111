@@ -170,7 +170,9 @@ public class CharacterCard : MonoBehaviour
         if (photoImage != null)
         {
             var  displayPhoto = _runtimePhoto != null ? _runtimePhoto : data.photo;
-            bool hasPhoto     = data.photoUnlocked && displayPhoto != null;
+            // 次要人物直接显示配置好的头像；主要人物需要解锁后才显示
+            bool hasPhoto = displayPhoto != null &&
+                            (data.photoUnlocked || data.characterType == CharacterType.Minor);
             photoImage.gameObject.SetActive(hasPhoto);
             if (photoBorderGray != null) photoBorderGray.SetActive(!hasPhoto);
             if (hasPhoto) photoImage.sprite = displayPhoto;

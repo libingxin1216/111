@@ -99,12 +99,22 @@ public class ColleagueDeliveryController : MonoBehaviour
     void Awake()
     {
         Instance = this;
+        if (audioSource == null)
+            audioSource = GetComponent<AudioSource>() ?? gameObject.AddComponent<AudioSource>();
         if (doorCrackLight   != null) doorCrackLight.SetActive(false);
         if (colleagueOverlay != null) colleagueOverlay.SetActive(false);
         if (speechBubble     != null) speechBubble.SetActive(false);
         if (confirmButton    != null) confirmButton.gameObject.SetActive(false);
         if (overlayClickArea != null) overlayClickArea.gameObject.SetActive(false);
         if (folderBadge      != null) folderBadge.SetActive(false);
+
+        // 确保门按钮内所有装饰性 Graphic 不拦截点击（只让 Button 的 targetGraphic 接受射线）
+        if (doorButton != null)
+        {
+            var targetGraphic = doorButton.targetGraphic;
+            foreach (var g in doorButton.GetComponentsInChildren<UnityEngine.UI.Graphic>(true))
+                if (g != targetGraphic) g.raycastTarget = false;
+        }
 
         // confirmButton 监听器只注册一次，不会因 SetActive 而丢失
         confirmButton?.onClick.AddListener(OnConfirmClicked);
@@ -150,6 +160,8 @@ public class ColleagueDeliveryController : MonoBehaviour
                        : new[] { "有你的文件，请查收。" };
         _lineIndex    = 0;
         _onComplete   = onComplete;
+        // 序列开始时立即禁用门按钮，防止敲门期间被重复点击触发
+        if (doorButton != null) doorButton.interactable = false;
         StartCoroutine(DeliverySequence());
     }
 
@@ -158,15 +170,15 @@ public class ColleagueDeliveryController : MonoBehaviour
     // ════════════════════════════════════════════════════════════════════
     IEnumerator DeliverySequence()
     {
-        // ── 步骤 1：门缝光效 ──────────────────────────────────────────
+        // ── 步骤 1：先播敲门音效 ──────────────────────────────────────
+        yield return PlayKnocks(1, 0f);
+
+        // ── 步骤 2：敲门声结束后再显示门高亮图片 ─────────────────────
         if (doorCrackLight != null)
         {
             doorCrackLight.SetActive(true);
             _crackFlicker = StartCoroutine(FlickerCrackLight());
         }
-
-        // ── 步骤 2：敲门音效 3 次 ─────────────────────────────────────
-        yield return PlayKnocks(3, 0.38f);
 
         // ── 步骤 3：激活门按钮 ────────────────────────────────────────
         if (doorButton != null)

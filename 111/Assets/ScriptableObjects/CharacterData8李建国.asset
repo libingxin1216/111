@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: "CharacterData8\u674E\u5EFA\u56FD"
   m_EditorClassIdentifier: 
   characterId: "\u674E\u5EFA\u56FD"
-  characterType: 0
+  characterType: 1
   correctName: "\u674E\u5EFA\u56FD"
   correctRole: "\u5DE5\u4EBA"
   photo: {fileID: 21300000, guid: 78a77ba7b080eea42aa395e8b15b7cf5, type: 3}

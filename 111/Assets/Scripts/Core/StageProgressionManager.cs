@@ -33,7 +33,8 @@ public class StageProgressionManager : MonoBehaviour
     {
         "CLU_OVERVIEW",        // 钟德发交代的案件大体
         "CLU_FENG_ZHONG_CONF", // 南溪市凤栖路8·14儿童拐卖案钟德发口供
-        "CLU_FENG_XIE_REPORT"  // 南溪市凤栖路8·14儿童拐卖案谢明远报案记录
+        "CLU_FENG_XIE_REPORT", // 南溪市凤栖路8·14儿童拐卖案谢明远报案记录
+        "CLU_PHONE_XIE"        // 谢雨彤手机截图
     };
 
     // ── 阶段线索 ──────────────────────────────────────────────────────────
@@ -128,12 +129,12 @@ public class StageProgressionManager : MonoBehaviour
         if (initialClueIds == null || initialClueIds.Length == 0) return;
         if (GameManager.Instance == null) return;
 
-        // 用专用阶段标记判重，避免与 nextDeliveryClueId 重叠导致误判
-        if (GameManager.Instance.HasClearedStage(STAGE_INITIAL)) return;
+        // 标记阶段（供外部查询），但不用它做早退——逐条去重由 UnlockClues 负责，
+        // 这样后续新增到 initialClueIds 的线索也能发放给已通过初始触发点的玩家。
         GameManager.Instance.MarkStageCleared(STAGE_INITIAL);
 
         UnlockClues(initialClueIds, showNotification: true);
-        Debug.Log($"[StageProgression] 初始线索已发放（{initialClueIds.Length} 条）");
+        Debug.Log($"[StageProgression] 初始线索检查完毕（共 {initialClueIds.Length} 条）");
     }
 
     // ════════════════════════════════════════════════════════════════════

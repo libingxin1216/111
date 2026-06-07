@@ -357,22 +357,34 @@ public static class ClueCardRenderer
         {
             foreach (var hs in clue.faceHotspots)
             {
-                float bx = (hs.normalizedRect.x + hs.normalizedRect.width  * 0.5f - 0.5f) * imgW;
-                float by = (hs.normalizedRect.y + hs.normalizedRect.height * 0.5f - 0.5f) * imgH;
-                float bw = hs.normalizedRect.width  * imgW;
-                float bh = hs.normalizedRect.height * imgH;
+                // normalizedRect 宽/高为零时（未精确配置），回退为整张照片均可点击
+                bool fullArea = hs.normalizedRect.width <= 0f || hs.normalizedRect.height <= 0f;
+
+                float bx, by, bw, bh;
+                if (fullArea)
+                {
+                    bx = 0f; by = 0f; bw = imgW; bh = imgH;
+                }
+                else
+                {
+                    bx = (hs.normalizedRect.x + hs.normalizedRect.width  * 0.5f - 0.5f) * imgW;
+                    by = (hs.normalizedRect.y + hs.normalizedRect.height * 0.5f - 0.5f) * imgH;
+                    bw = hs.normalizedRect.width  * imgW;
+                    bh = hs.normalizedRect.height * imgH;
+                }
 
                 var hsRect = MakeRect(img, $"Face_{hs.characterId}", bw, bh, Color.clear);
                 Pos(hsRect, bx, by);
-                // 虚线边框提示（金色半透明）
-                MakeBg(MakeRect(hsRect, "border", bw - 2, bh - 2, new Color(1f, 0.85f, 0f, 0.22f)));
+                // 整图可点击时不显示金色边框（避免遮挡）；精确热区才显示定位框
+                if (!fullArea)
+                    MakeBg(MakeRect(hsRect, "border", bw - 2, bh - 2, new Color(1f, 0.85f, 0f, 0.22f)));
                 // 点击按钮（characterPhoto 未配置时兜底使用整张照片）
                 var btn = hsRect.GetComponent<Button>() ?? hsRect.AddComponent<Button>();
                 btn.targetGraphic = hsRect.GetComponent<Image>() ?? hsRect.AddComponent<Image>();
                 ((Image)btn.targetGraphic).color = Color.clear;
-                ((Image)btn.targetGraphic).raycastTarget = true;   // 热区必须接收点击
-                var capturedHs      = hs;
-                var capturedFallback = clue.fullImage;             // 无专属照片时用整图
+                ((Image)btn.targetGraphic).raycastTarget = true;
+                var capturedHs       = hs;
+                var capturedFallback = clue.fullImage;
                 btn.onClick.AddListener(() =>
                 {
                     var photo = capturedHs.characterPhoto != null
