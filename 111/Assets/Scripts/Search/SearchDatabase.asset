@@ -22,10 +22,11 @@ MonoBehaviour:
     detailContent: "   \u59D3\u540D\uFF1A\u949F\u5FB7\u53D1\n   \u8EAB\u4EFD\u8BC1\u53F7\uFF1Axxxxxx197803124715\n  
       \u8054\u7CFB\u7535\u8BDD\uFF1A15789567456\n   \u8EAB\u4EFD\uFF1A\u65E0\u4E1A\u4EBA\u5458\n  
       \u5907\u6CE8\uFF1A\u5931\u4FE1\u88AB\u6267\u884C\u4EBA\u3001\u72AF\u7F6A\u5ACC\u7591\u4EBA "
-    detailImages: []
+    detailImages:
+    - {fileID: 21300000, guid: 9baff51cf5ccf5c4f9d6893c5f8ce2ec, type: 3}
     requiredClueIds: []
     triggerClueId: 
-    triggerPhotoForCharacterId: P_001
+    triggerPhotoForCharacterId: "\u949F\u5FB7\u53D1"
   - triggerWords:
     - "\u51E4\u6816\u5C0F\u5B66"
     matchType: 0
@@ -45,20 +46,22 @@ MonoBehaviour:
     resultTitle: "\u5357\u6EAA\u5E02\u5C0F\u5B66\u751F\u5408\u5531\u6BD4\u8D5B\u83B7\u5956\u540D\u5355"
     detailContent: "   \u672C\u5C4A\u5357\u6EAA\u5E02\u5C0F\u5B66\u751F\u5408\u5531\u6BD4\u8D5B\u4E00\u7B49\u5956\uFF1A\u51E4\u6816\u5C0F\u5B66\u4E8C\u5E74\u7EA73\u73ED\u82B1\u6D77\u5408\u5531\u56E2\u3002\n  
       \u5408\u5531\u56E2\u6307\u6325\uFF1A\u8C22\u96E8\u5F64\uFF08\u53F3\u56FE\uFF09\u3002"
-    detailImages: []
+    detailImages:
+    - {fileID: 21300000, guid: 68a8b55ddb7c7134c8bf78094dd4c54f, type: 3}
     requiredClueIds: []
     triggerClueId: 
-    triggerPhotoForCharacterId: P_003
+    triggerPhotoForCharacterId: "\u8C22\u96E8\u5F64"
   - triggerWords:
     - "\u5218\u9646"
     matchType: 0
     isDistractor: 0
     resultTitle: "\u5218\u9646\u2014\u2014\u5357\u6EAA\u5E02\u4F18\u79C0\u6559\u80B2\u5DE5\u4F5C\u8005"
     detailContent: "\u5218\u9646\uFF0C\u73B0\u4EFB\u51E4\u6816\u5C0F\u5B66\u6821\u957F\uFF0C\u4ECE\u6559\u4E09\u5341\u4F59\u5E74\uFF0C\u66FE\u83B7\u591A\u9879\u5E02\u7EA7\u6559\u80B2\u8363\u8A89\u3002"
-    detailImages: []
+    detailImages:
+    - {fileID: 21300000, guid: 219fd7f8557f2d44aa970601636b80ca, type: 3}
     requiredClueIds: []
     triggerClueId: 
-    triggerPhotoForCharacterId: 
+    triggerPhotoForCharacterId: "\u5218\u9646"
   - triggerWords:
     - "\u5357\u6EAA\u4E00\u4E2D"
     matchType: 0
@@ -75,7 +78,8 @@ MonoBehaviour:
     isDistractor: 0
     resultTitle: "\u7A57\u57CE\u5E02\u7EA7\u4F18\u79C0\u6559\u5E08\u540D\u5355\u516C\u793A"
     detailContent: "\u672C\u5C4A\u7A57\u57CE\u5E02\u7EA7\u4F18\u79C0\u6559\u5E08\uFF1A\u6797\u5A49\u6E05\u3002"
-    detailImages: []
+    detailImages:
+    - {fileID: 21300000, guid: 155e2eb92a872e748a5c0e540739ac36, type: 3}
     requiredClueIds: []
     triggerClueId: 
     triggerPhotoForCharacterId: 
@@ -101,10 +105,11 @@ MonoBehaviour:
     detailContent: "   \u5931\u8E2A\u513F\u7AE5\uFF1A\u674E\u96E8\u6B23\n   \u7279\u5F81\uFF1A\u77ED\u53D1\uFF0C\u8EAB\u7A7F\u7EA2\u8272\u8863\u670D\u3002\n  
       \u8054\u7CFB\u4EBA\uFF1A\n     \u5F20\u7FE0\u5170  \u7535\u8BDD\uFF1A16578953256\n    
       \u674E\u5EFA\u56FD  \u7535\u8BDD\uFF1A14689562798"
-    detailImages: []
+    detailImages:
+    - {fileID: 21300000, guid: f9bf0f763b6d23f48854c4a844a1d80b, type: 3}
     requiredClueIds: []
     triggerClueId: 
-    triggerPhotoForCharacterId: 
+    triggerPhotoForCharacterId: "\u674E\u96E8\u6B23"
   - triggerWords:
     - "\u5357\u6EAA\u5E02\u5858\u5C3E\u6751\u513F\u7AE5\u62D0\u5356\u6848\u949F\u5FB7\u53D1\u53E3\u4F9B"
     - "\u949F\u5FB7\u53D1\u53E3\u4F9B"
@@ -159,10 +164,11 @@ MonoBehaviour:
     detailContent: "\u5858\u5C3E\u6751\u5C0F\u5B66\u7684\u5B66\u751F\u4EE3\u8868\u9648\u5609\u4E50\u4E0E\u76D1\u62A4\u4EBA\u9648\u5B88\u5C71\u3001\u738B\u79C0\u83B2\uFF0C\n  
       \u624B\u6301\u8D44\u52A9\u7269\u54C1\u4E0E\u5E2E\u5973\u90CE\u5DE5\u4F5C\u4EBA\u5458\u5408\u5F71\u7559\u5FF5\u3002\n  
       \n   \u6B64\u5916\uFF0C\u9648\u5609\u4E50\u7684\u4F5C\u6587\u300A\u6211\u7684\u5BB6\u4EBA\u300B\u8363\u83B7\u6995\u57CE\u5C0F\u5B66\u751F\u4F5C\u6587\u6BD4\u8D5B\"\u5BB6\u4EBA\u4E3B\u9898\"\u4E00\u7B49\u5956\u3002"
-    detailImages: []
+    detailImages:
+    - {fileID: 21300000, guid: 63d864308cee1054b8620095c9ce57a8, type: 3}
     requiredClueIds: []
     triggerClueId: 
-    triggerPhotoForCharacterId: 
+    triggerPhotoForCharacterId: "\u9648\u5609\u4E50"
   - triggerWords:
     - "\u5E2E\u5973\u90CE\u843D\u4E91\u5C6F"
     - "\u5E2E\u5973\u90CE \u843D\u4E91\u5C6F"

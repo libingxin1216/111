@@ -32,6 +32,10 @@ public class NavigationBar : MonoBehaviour
     [Header("笔记本叠加层")]
     public GameObject notebookOverlayPanel;
 
+    [Header("★ 新增：设置面板")]
+    [Tooltip("挂有 SettingsPanelController 的设置面板（仅主界面场景需要配置）")]
+    public SettingsPanelController settingsPanelController;
+
     // ── 红点动画参数 ───────────────────────────────────────────────────
     [Header("红点脉冲动画")]
     [Tooltip("脉冲峰值缩放倍数（建议 1.25-1.40）")]
@@ -101,7 +105,10 @@ public class NavigationBar : MonoBehaviour
 
     void OnClickSettings()
     {
-        Debug.Log("设置菜单（待实现）");
+        if (settingsPanelController != null)
+            settingsPanelController.ToggleSettings();
+        else
+            Debug.Log("设置菜单（未配置 settingsPanelController）");
     }
 
     // ════════════════════════════════════════════════════════════════════
