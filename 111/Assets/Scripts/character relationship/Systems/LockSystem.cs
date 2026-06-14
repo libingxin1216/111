@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class LockSystem : MonoBehaviour
 {
@@ -101,6 +102,21 @@ public class LockSystem : MonoBehaviour
             CheckStageProgress();
         else
             Debug.Log("[LockSystem] 本次提交没有新增锁定的角色（填写内容与正确答案不符）。");
+
+        CheckAllSolved();
+    }
+
+    // 检查是否所有人物信息均已判定成功，若是则跳转到最终结局场景
+    private void CheckAllSolved()
+    {
+        if (dataMap.Count == 0) return;
+        if (CountLocked() < dataMap.Count) return;
+
+        Debug.Log("[LockSystem] 所有人物信息均已判定成功，跳转到最终结局场景。");
+        if (SceneTransitionManager.Instance != null)
+            SceneTransitionManager.Instance.GoToScene("FinalScene");
+        else
+            SceneManager.LoadScene("FinalScene");
     }
 
     // 判断人物信息是否对齐
